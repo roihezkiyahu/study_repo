@@ -1,0 +1,256 @@
+---
+title: "EX8"
+author: "roi hezkiyahu"
+date: "28 4 2022"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+```{r message=FALSE, warning=FALSE}
+# imports
+library(tidyverse)
+library(glue)
+library(tidymodels)
+```
+
+# Q1
+
+![](Q1.png)
+
+**a**
+
+
+$$
+\textrm{assume } v>u
+\\
+expit(v) = \frac{e^v}{1+e^v} > \frac{e^u}{1+e^u} = expit(u) \iff e^v + e^{v+u} > e^u + e^{v+u} \iff e^v > e^u \iff v>u
+$$
+
+
+**b**
+
+$$
+p1>p2
+logit(p1) = log(\frac{p1}{1-p1}) > log(\frac{p2}{1-p2}) = logit(p2) \iff log(p1) - log(1-p1) > log(p2) - log(1-p2) \iff log(p1) - log(p2) > log(1-p1) - log(1-p2) \iff
+\\
+\iff log(\frac{p1}{p2}) > log(\frac{1-p1}{1-p2}) \iff \frac{p1}{p2} > \frac{1-p1}{1-p2}
+\\
+\textrm{the last equality holds because: } \frac{p1}{p2} > 1, \frac{1-p1}{1-p2} <1 
+$$
+
+**c**
+
+
+$$
+\textrm{we need to show that } |log(p) - logit(p)| \textrm{ is a monotonic increasing function}
+\\
+|log(p) - logit(p)| = |log(p) - log(p) + log(1-p)| = |log (1-p)|
+\\
+\textrm{which is a monotonic increasing function of p}
+$$
+
+
+**d**
+
+
+```{r}
+#logit function
+logit <- function(p){log(p/(1-p))}
+#create values
+p_values <- seq(0,1,length.out=1002)[2:1001]
+#calculate log values
+log_p <- log(p_values)
+#calculate logit values
+logit_p <- logit(p_values)
+tbl <- tibble("p"=p_values,
+              "log_p"= log_p,
+              "logit_p" = logit_p)
+tbl %>%
+  ggplot(aes(x = p_values,y=logit_p,z = log_p))+
+  geom_line(aes(x=p_values,y=logit_p,color = "logit_p"),lty = 2)+
+  geom_line(aes(x=p_values,y=log_p,color = "log_p"))+
+  labs(x = "p",
+       y = "dunction value",
+       color = "Legend")+
+  scale_color_manual(values = c("logit_p" = "red","log_p" = "blue"))
+```
+
+*we can see from the graph that when p increases the distance between the 2 functions increases and the lines are rather close from p<0.25, this is exactly our conclusion on the last question*
+
+
+**e**
+
+
+```{r}
+d_dist <- function(d){
+  potienal_p <- seq(0.0000005,1,0.0000005)
+  for (i in (1:length(potienal_p))) {
+    p <-  potienal_p[i]
+    if (logit(p)-log(p)>d){
+      return(potienal_p[i+1])
+    }
+  }
+  return(potienal_p[1])
+}
+```
+
+
+# Q2
+
+![](Q2.png)
+
+
+$$
+x = (1,x_1,\ldots,x_k)
+\\
+y = (1,x_1,\ldots,x_k+1)
+\\
+expit(\beta^tx) = \frac{e^{\beta^tx}}{1+e^{\beta^tx}} = \frac{e^{\beta_{-k}^tx_{-k}}e^{\beta_kx_k}}{1+e^{\beta_{-k}^tx_{-k}}e^{\beta_kx_k}}
+\\
+expit(\beta^ty) = \frac{e^{\beta^ty}}{1+e^{\beta^ty}} = \frac{e^{\beta_{-k}^ty_{-k}}e^{\beta_ky_k}}{1+e^{\beta_{-k}^ty_{-k}}e^{\beta_ky_k}} = \frac{e^{\beta_{-k}^tx_{-k}}e^{\beta_kx_k}e^{\beta_k}}{1+e^{\beta_{-k}^tx_{-k}}e^{\beta_kx_k}e^{\beta_k}}
+\\
+\frac{Pr(Y=1|X=x)}{1-Pr(Y=1|X=x)}=\frac{expit(\beta^tx)}{1-expit(\beta^tx)} = \frac{e^{\beta_{-k}^tx_{-k}}e^{\beta_kx_k}}{1+e^{\beta_{-k}^tx_{-k}}e^{\beta_kx_k}} /\frac{1}{1+e^{\beta_{-k}^tx_{-k}}e^{\beta_kx_k}} = e^{\beta_{-k}^tx_{-k}}e^{\beta_kx_k}
+\\
+\frac{Pr(Y=1|X=y)}{1-Pr(Y=1|X=y)} = \ldots \textrm{same as above}\ldots = e^{\beta_{-k}^tx_{-k}}e^{\beta_kx_k}e^{\beta_k}
+\\
+OR = \frac{\frac{Pr(Y=1|X=y)}{1-Pr(Y=1|X=y)}}{\frac{Pr(Y=1|X=x)}{1-Pr(Y=1|X=x)}} = \frac{e^{\beta_{-k}^tx_{-k}}e^{\beta_kx_k}e^{\beta_k}}{e^{\beta_{-k}^tx_{-k}}e^{\beta_kx_k}} = e^{\beta_k}
+$$
+
+
+# Q3
+
+![](Q3a.png)
+![](Q3b.png)
+![](Q3c.png)
+
+
+**a**
+
+
+```{r}
+MI <- read.csv("MI_PracticeDataset.csv") %>%
+  select(Sex,Age,CVDeath_2012)%>%
+  mutate(across(c(CVDeath_2012,Sex),factor))
+model <- glm(CVDeath_2012~Sex,data = MI,family = "binomial")
+summary(model)
+```
+
+*sex is has discrete values thus the model is saturated*
+
+*we can see that sex has a large effect on CVDeath_2012, where woman has a higher chance to die*
+
+
+$$
+OR = e^{\beta_1} = e^{0.41461} \approx 1.51378, \textrm{it is the same as the previous exercise results}
+$$
+
+*the OR estimates suggests that a woman chance of dying from myocardial infection compared to not getting an infection is 151% of the chance man has*
+
+
+```{r}
+conf_def <- exp(confint.default(model)[2,])
+names(conf_def) <- c()
+#tidy coef matrix
+coef_mat <- tidy(model)
+conf_glm <- exp(coef_mat$estimate[2] + c(-1,1) * qnorm(0.975)* coef_mat$std.error[2])
+tibble("method"= c("confint.default","glm"),"L"= c(conf_def[1],conf_glm[1]),"U"= c(conf_def[2],conf_glm[2]))
+#is it close?
+near(conf_def,conf_glm)
+```
+
+*the CIs are the same*
+
+
+**b**
+
+```{r}
+model_b <- glm(CVDeath_2012~Age,data = MI,family = "binomial")
+summary(model_b)
+```
+
+*the model is not saturated because we have more data points then parameters*
+
+*we can see that higher age groups have a higher chance of not surviving CV*
+
+$$
+OR = e^{\beta_1} = e^{0.049414} \approx 1.05
+$$
+
+*the OR estimates suggests that getting older by one year rasies the chance of dying from myocardial infection compared to not getting an infection by 5%*
+
+
+```{r}
+conf_def2 <- exp(confint.default(model_b)[2,])
+names(conf_def2) <- c()
+#tidy coef matrix
+coef_mat2 <- tidy(model_b)
+conf_glm2 <- exp(coef_mat2$estimate[2] + c(-1,1) * qnorm(0.975)* coef_mat2$std.error[2])
+tibble("method"= c("confint.default","glm"),"L"= c(conf_def2[1],conf_glm2[1]),"U"= c(conf_def2[2],conf_glm2[2]))
+#is it close?
+near(conf_def2,conf_glm2)
+```
+
+$$
+\textrm{the estimate for the OR between 40 and 50 years is the same as the OR between 50 and 60 and is: }e^{10\beta1}
+\\
+\beta_1 \sim N(0.049414,0.008627) \Rightarrow 10\beta_1 \sim N(0.49414,0.8627)
+$$
+
+```{r}
+glue("the OR estimate is: {round(exp(0.49),3)}
+     and the CI is ({round(exp(0.49 -  qnorm(0.975)*0.8627),3)},{round(exp(0.49 +qnorm(0.975)*0.8627),3)})")
+```
+
+```{r}
+expit <- function(p){exp(p)/(1+exp(p))}
+x <- c(1,50)
+beta_hat <-  coef_mat2$estimate
+x_t_beta <- t(x)%*%beta_hat
+glue("for a 50 year old the chance of dying is: {round(expit(x_t_beta)*100,2)}%")
+sigma_hat <- vcov(model_b)
+
+glue("sigma hat is:")
+sigma_hat
+glue("beta hat is:{beta_hat[1]},{beta_hat[2]}")
+c_i <-  round(expit(as.numeric(x_t_beta) + c(-1,1)* qnorm(0.975) * as.numeric(sqrt(t(x)%*%sigma_hat%*%x))),4)
+glue("CI for dying chance is: ({c_i[1]*100}%,{c_i[2]*100}%)")
+```
+
+
+**c**
+
+
+```{r}
+MI <- MI %>%
+  mutate(Age_saqured = Age^2)
+model_c<- glm(CVDeath_2012~Age + Age_saqured ,data = MI,family = "binomial")
+summary(model_c)
+```
+
+$$
+\textrm{we can see that: }age^2 \textrm{ is non significant}
+$$
+
+
+
+```{r}
+coef_mat_c <- tidy(model_c)
+beta_hat_c <- coef_mat_c$estimate
+diff_vec_40_50 <- c(10,50^2-40^2)
+diff_vec_50_60 <- c(10,60^2-50^2)
+#point estimates
+pe_40_50 <- as.numeric(beta_hat_c[c(2,3)]%*%diff_vec_40_50)
+#point estimates
+pe_50_60 <- as.numeric(beta_hat_c[c(2,3)]%*%diff_vec_50_60)
+#variance estimation:
+v_40_50 <- as.numeric(sqrt(diff_vec_40_50 %*% vcov(model_c)[c(2,3),c(2,3)] %*% diff_vec_40_50))
+v_50_60 <- as.numeric(sqrt(diff_vec_50_60 %*% vcov(model_c)[c(2,3),c(2,3)] %*% diff_vec_50_60))
+glue("the OR estimate for comparing age 40 to 50 is: {round(exp(pe_40_50),3)}
+     and the CI is ({round(exp(pe_40_50 -  qnorm(0.975)*v_40_50),3)},{round(exp(pe_40_50 +qnorm(0.975)*v_40_50),3)})
+     the OR estimate for comparing age 50 to 60 is: {round(exp(pe_50_60),3)}
+     and the CI is ({round(exp(pe_50_60 -  qnorm(0.975)*v_50_60),3)},{round(exp(pe_50_60 +qnorm(0.975)*v_50_60),3)})")
+```
+

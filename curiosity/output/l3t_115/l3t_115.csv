@@ -1,0 +1,320 @@
+,action,who,s_time,e_time,t_time,sub_action,action:sub_action
+0,Child utterance,Child,156.47,157.05,0.58,utterance,Child utterance:utterance
+1,Child utterance,Child,188.73,189.17,0.44,utterance,Child utterance:utterance
+2,Child utterance,Child,232.48,233.1,0.62,utterance,Child utterance:utterance
+3,Child utterance,Child,255.5,257.02,1.52,utterance,Child utterance:utterance
+4,Child utterance,Child,291.25,291.79,0.54,utterance,Child utterance:utterance
+5,Child utterance,Child,295.17,296.13,0.96,utterance,Child utterance:utterance
+6,Child utterance,Child,351.26,351.88,0.62,utterance,Child utterance:utterance
+7,Child utterance,Child,384.24,384.7,0.46,utterance,Child utterance:utterance
+8,Child utterance,Child,385.91,386.25,0.34,utterance,Child utterance:utterance
+9,Child utterance,Child,411.88,412.52,0.64,utterance,Child utterance:utterance
+10,Child utterance,Child,413.72,414.7,0.98,utterance,Child utterance:utterance
+11,Child gaze,Child,4.63,35.36,30.73,tablet,Child gaze:tablet
+12,Child gaze,Child,37.2,63.52,26.32,tablet,Child gaze:tablet
+13,Child gaze,Child,65.56,78.36,12.8,tablet,Child gaze:tablet
+14,Child gaze,Child,78.4,79.72,1.32,parent,Child gaze:parent
+15,Child gaze,Child,79.86,83.14,3.28,tablet,Child gaze:tablet
+16,Child gaze,Child,83.22,83.98,0.76,parent,Child gaze:parent
+17,Child gaze,Child,84.08,116.03999999999999,31.96,tablet,Child gaze:tablet
+18,Child gaze,Child,116.14,116.7,0.56,parent,Child gaze:parent
+19,Child gaze,Child,116.78,142.46,25.68,tablet,Child gaze:tablet
+20,Child gaze,Child,143.38,145.3,1.92,tablet,Child gaze:tablet
+21,Child gaze,Child,145.34,146.5,1.16,parent,Child gaze:parent
+22,Child gaze,Child,146.52,162.28,15.76,tablet,Child gaze:tablet
+23,Child gaze,Child,169.32,188.84,19.52,tablet,Child gaze:tablet
+24,Child gaze,Child,188.96,190.44,1.48,parent,Child gaze:parent
+25,Child gaze,Child,190.54,195.46,4.92,tablet,Child gaze:tablet
+26,Child gaze,Child,195.52,196.68,1.16,parent,Child gaze:parent
+27,Child gaze,Child,196.78,198.18,1.4,tablet,Child gaze:tablet
+28,Child gaze,Child,200.2,202.48,2.28,tablet,Child gaze:tablet
+29,Child gaze,Child,202.62,204.74,2.12,parent,Child gaze:parent
+30,Child gaze,Child,204.8,219.12,14.32,tablet,Child gaze:tablet
+31,Child gaze,Child,219.16,220.68,1.52,parent,Child gaze:parent
+32,Child gaze,Child,220.8,228.96,8.16,tablet,Child gaze:tablet
+33,Child gaze,Child,229.04,231.4,2.36,parent,Child gaze:parent
+34,Child gaze,Child,231.5,255.42,23.92,tablet,Child gaze:tablet
+35,Child gaze,Child,255.54,257.78,2.24,parent,Child gaze:parent
+36,Child gaze,Child,257.86,265.18,7.32,tablet,Child gaze:tablet
+37,Child gaze,Child,265.24,266.48,1.24,parent,Child gaze:parent
+38,Child gaze,Child,266.58,276.1,9.52,tablet,Child gaze:tablet
+39,Child gaze,Child,276.22,276.78,0.56,parent,Child gaze:parent
+40,Child gaze,Child,276.86,295.65999999999997,18.8,tablet,Child gaze:tablet
+41,Child gaze,Child,295.78,297.26,1.48,parent,Child gaze:parent
+42,Child gaze,Child,297.32,301.0,3.68,tablet,Child gaze:tablet
+43,Child gaze,Child,392.0,400.36,8.36,tablet,Child gaze:tablet
+44,Child gaze,Child,400.5,403.62,3.12,parent,Child gaze:parent
+45,Child gaze,Child,403.74,411.5,7.76,tablet,Child gaze:tablet
+46,Child gaze,Child,411.62,412.82,1.2,parent,Child gaze:parent
+47,Child gaze,Child,412.94,417.3,4.36,tablet,Child gaze:tablet
+48,Child affect,Child,77.9,79.6,1.7,positive 2,Child affect:positive 2
+49,Child affect,Child,83.15,84.05,0.9,positive 1,Child affect:positive 1
+50,Child affect,Child,142.4,143.8,1.4,positive 1,Child affect:positive 1
+51,Child affect,Child,145.28,146.68,1.4,positive 1,Child affect:positive 1
+52,Child affect,Child,188.78,190.38,1.6,positive 1,Child affect:positive 1
+53,Child affect,Child,230.84,231.44,0.6,positive 1,Child affect:positive 1
+54,Child affect,Child,255.22,259.18,3.96,positive 2,Child affect:positive 2
+55,Child affect,Child,295.12,296.72,1.6,positive 2,Child affect:positive 2
+56,Child affect,Child,400.76,403.28,2.52,positive 1,Child affect:positive 1
+57,Child affect,Child,411.54,412.58,1.04,positive 1,Child affect:positive 1
+58,Child gesture,Child,115.61,116.53,0.92,point at prop,Child gesture:point at prop
+59,Child gesture,Child,147.22,148.4,1.18,point at prop,Child gesture:point at prop
+60,Parent utterance,Parent,78.8,80.0,1.2,utterance,Parent utterance:utterance
+61,Parent utterance,Parent,83.24,84.36,1.12,utterance,Parent utterance:utterance
+62,Parent utterance,Parent,87.8,88.76,0.96,utterance,Parent utterance:utterance
+63,Parent utterance,Parent,95.32,96.66,1.34,utterance,Parent utterance:utterance
+64,Parent utterance,Parent,97.75,98.28999999999999,0.54,utterance,Parent utterance:utterance
+65,Parent utterance,Parent,100.97999999999999,102.66,1.68,utterance,Parent utterance:utterance
+66,Parent utterance,Parent,105.94,107.22,1.28,utterance,Parent utterance:utterance
+67,Parent utterance,Parent,116.52000000000001,117.4,0.88,utterance,Parent utterance:utterance
+68,Parent utterance,Parent,128.92,130.12,1.2,utterance,Parent utterance:utterance
+69,Parent utterance,Parent,137.32,138.02,0.7,utterance,Parent utterance:utterance
+70,Parent utterance,Parent,138.59,139.39,0.8,utterance,Parent utterance:utterance
+71,Parent utterance,Parent,146.13,146.91,0.78,utterance,Parent utterance:utterance
+72,Parent utterance,Parent,148.38,150.46,2.08,utterance,Parent utterance:utterance
+73,Parent utterance,Parent,152.56,153.22,0.66,utterance,Parent utterance:utterance
+74,Parent utterance,Parent,158.3,160.38,2.08,utterance,Parent utterance:utterance
+75,Parent utterance,Parent,171.68,172.76,1.08,utterance,Parent utterance:utterance
+76,Parent utterance,Parent,175.04,177.4,2.36,utterance,Parent utterance:utterance
+77,Parent utterance,Parent,181.0,182.22,1.22,utterance,Parent utterance:utterance
+78,Parent utterance,Parent,189.83,192.79,2.96,utterance,Parent utterance:utterance
+79,Parent utterance,Parent,196.73,197.37,0.64,utterance,Parent utterance:utterance
+80,Parent utterance,Parent,201.07,201.55,0.48,utterance,Parent utterance:utterance
+81,Parent utterance,Parent,204.99,206.91,1.92,utterance,Parent utterance:utterance
+82,Parent utterance,Parent,207.43,208.57,1.14,utterance,Parent utterance:utterance
+83,Parent utterance,Parent,208.68,210.06,1.38,utterance,Parent utterance:utterance
+84,Parent utterance,Parent,222.37,223.32999999999998,0.96,utterance,Parent utterance:utterance
+85,Parent utterance,Parent,230.59,232.41,1.82,utterance,Parent utterance:utterance
+86,Parent utterance,Parent,233.41,237.45,4.04,utterance,Parent utterance:utterance
+87,Parent utterance,Parent,238.82999999999998,240.51,1.68,utterance,Parent utterance:utterance
+88,Parent utterance,Parent,249.67,250.45,0.78,utterance,Parent utterance:utterance
+89,Parent utterance,Parent,262.42,263.74,1.32,utterance,Parent utterance:utterance
+90,Parent utterance,Parent,267.16,268.66,1.5,utterance,Parent utterance:utterance
+91,Parent utterance,Parent,271.57,272.79,1.22,utterance,Parent utterance:utterance
+92,Parent utterance,Parent,273.06,273.8,0.74,utterance,Parent utterance:utterance
+93,Parent utterance,Parent,275.99,276.95,0.96,utterance,Parent utterance:utterance
+94,Parent utterance,Parent,277.03,277.65,0.62,utterance,Parent utterance:utterance
+95,Parent utterance,Parent,281.22,283.02,1.8,utterance,Parent utterance:utterance
+96,Parent utterance,Parent,286.46,286.98,0.52,utterance,Parent utterance:utterance
+97,Parent utterance,Parent,287.5,288.36,0.86,utterance,Parent utterance:utterance
+98,Parent utterance,Parent,292.96,294.1,1.14,utterance,Parent utterance:utterance
+99,Parent utterance,Parent,297.73,298.40999999999997,0.68,utterance,Parent utterance:utterance
+100,Parent utterance,Parent,304.89,305.19,0.3,utterance,Parent utterance:utterance
+101,Parent utterance,Parent,305.54,306.56,1.02,utterance,Parent utterance:utterance
+102,Parent utterance,Parent,309.33,310.25,0.92,utterance,Parent utterance:utterance
+103,Parent utterance,Parent,314.63,315.63,1.0,utterance,Parent utterance:utterance
+104,Parent utterance,Parent,316.61,318.53,1.92,utterance,Parent utterance:utterance
+105,Parent utterance,Parent,318.81,320.09,1.28,utterance,Parent utterance:utterance
+106,Parent utterance,Parent,330.36,332.98,2.62,utterance,Parent utterance:utterance
+107,Parent utterance,Parent,333.29,335.31,2.02,utterance,Parent utterance:utterance
+108,Parent utterance,Parent,336.3,336.94,0.64,utterance,Parent utterance:utterance
+109,Parent utterance,Parent,338.22,339.62,1.4,utterance,Parent utterance:utterance
+110,Parent utterance,Parent,340.08,341.4,1.32,utterance,Parent utterance:utterance
+111,Parent utterance,Parent,341.54,342.02,0.48,utterance,Parent utterance:utterance
+112,Parent utterance,Parent,353.40999999999997,358.17,4.76,utterance,Parent utterance:utterance
+113,Parent utterance,Parent,364.59,365.09,0.5,utterance,Parent utterance:utterance
+114,Parent utterance,Parent,367.6,368.68,1.08,utterance,Parent utterance:utterance
+115,Parent utterance,Parent,369.22,369.86,0.64,utterance,Parent utterance:utterance
+116,Parent utterance,Parent,371.92,375.26,3.34,utterance,Parent utterance:utterance
+117,Parent utterance,Parent,376.65,379.97,3.32,utterance,Parent utterance:utterance
+118,Parent utterance,Parent,383.21,384.27,1.06,utterance,Parent utterance:utterance
+119,Parent utterance,Parent,384.8,385.9,1.1,utterance,Parent utterance:utterance
+120,Parent utterance,Parent,386.35,386.79,0.44,utterance,Parent utterance:utterance
+121,Parent utterance,Parent,390.17,390.53,0.36,utterance,Parent utterance:utterance
+122,Parent utterance,Parent,391.41,392.47,1.06,utterance,Parent utterance:utterance
+123,Parent utterance,Parent,393.92,394.9,0.98,utterance,Parent utterance:utterance
+124,Parent utterance,Parent,404.4,405.96,1.56,utterance,Parent utterance:utterance
+125,Parent utterance,Parent,406.72,410.15999999999997,3.44,utterance,Parent utterance:utterance
+126,Parent utterance,Parent,412.49,413.67,1.18,utterance,Parent utterance:utterance
+127,Parent utterance,Parent,414.98,416.3,1.32,utterance,Parent utterance:utterance
+128,Parent utterance,Parent,416.62,417.84000000000003,1.22,utterance,Parent utterance:utterance
+129,Verbal scaffolding,Parent,87.8,88.76,0.96,cognitive,Verbal scaffolding:cognitive
+130,Verbal scaffolding,Parent,95.32,96.66,1.34,cognitive,Verbal scaffolding:cognitive
+131,Verbal scaffolding,Parent,97.75,98.28999999999999,0.54,technical,Verbal scaffolding:technical
+132,Verbal scaffolding,Parent,100.97999999999999,102.66,1.68,cognitive,Verbal scaffolding:cognitive
+133,Verbal scaffolding,Parent,116.52000000000001,117.4,0.88,cognitive,Verbal scaffolding:cognitive
+134,Verbal scaffolding,Parent,128.92,130.12,1.2,cognitive,Verbal scaffolding:cognitive
+135,Verbal scaffolding,Parent,137.32,138.02,0.7,affective,Verbal scaffolding:affective
+136,Verbal scaffolding,Parent,138.59,139.39,0.8,affective,Verbal scaffolding:affective
+137,Verbal scaffolding,Parent,146.13,146.91,0.78,cognitive,Verbal scaffolding:cognitive
+138,Verbal scaffolding,Parent,148.38,150.46,2.08,cognitive,Verbal scaffolding:cognitive
+139,Verbal scaffolding,Parent,158.3,160.38,2.08,cognitive,Verbal scaffolding:cognitive
+140,Verbal scaffolding,Parent,171.68,172.76,1.08,cognitive,Verbal scaffolding:cognitive
+141,Verbal scaffolding,Parent,175.04,177.4,2.36,cognitive,Verbal scaffolding:cognitive
+142,Verbal scaffolding,Parent,189.83,192.79,2.96,cognitive,Verbal scaffolding:cognitive
+143,Verbal scaffolding,Parent,201.07,201.55,0.48,cognitive,Verbal scaffolding:cognitive
+144,Verbal scaffolding,Parent,204.99,206.91,1.92,cognitive,Verbal scaffolding:cognitive
+145,Verbal scaffolding,Parent,207.43,208.57,1.14,cognitive,Verbal scaffolding:cognitive
+146,Verbal scaffolding,Parent,208.68,210.06,1.38,cognitive,Verbal scaffolding:cognitive
+147,Verbal scaffolding,Parent,222.37,223.32999999999998,0.96,cognitive,Verbal scaffolding:cognitive
+148,Verbal scaffolding,Parent,230.59,232.41,1.82,cognitive,Verbal scaffolding:cognitive
+149,Verbal scaffolding,Parent,233.41,237.45,4.04,cognitive,Verbal scaffolding:cognitive
+150,Verbal scaffolding,Parent,238.82999999999998,240.51,1.68,cognitive,Verbal scaffolding:cognitive
+151,Verbal scaffolding,Parent,249.67,250.45,0.78,cognitive,Verbal scaffolding:cognitive
+152,Verbal scaffolding,Parent,262.42,263.74,1.32,cognitive,Verbal scaffolding:cognitive
+153,Verbal scaffolding,Parent,267.16,268.66,1.5,cognitive,Verbal scaffolding:cognitive
+154,Verbal scaffolding,Parent,271.57,272.79,1.22,cognitive,Verbal scaffolding:cognitive
+155,Verbal scaffolding,Parent,273.06,273.8,0.74,cognitive,Verbal scaffolding:cognitive
+156,Verbal scaffolding,Parent,275.99,276.95,0.96,cognitive,Verbal scaffolding:cognitive
+157,Verbal scaffolding,Parent,277.03,277.65,0.62,cognitive,Verbal scaffolding:cognitive
+158,Verbal scaffolding,Parent,281.22,283.02,1.8,cognitive,Verbal scaffolding:cognitive
+159,Verbal scaffolding,Parent,286.46,286.98,0.52,cognitive,Verbal scaffolding:cognitive
+160,Verbal scaffolding,Parent,287.5,288.36,0.86,cognitive,Verbal scaffolding:cognitive
+161,Verbal scaffolding,Parent,292.96,294.1,1.14,cognitive,Verbal scaffolding:cognitive
+162,Verbal scaffolding,Parent,297.73,298.40999999999997,0.68,cognitive,Verbal scaffolding:cognitive
+163,Verbal scaffolding,Parent,304.89,305.19,0.3,cognitive,Verbal scaffolding:cognitive
+164,Verbal scaffolding,Parent,305.54,306.56,1.02,cognitive,Verbal scaffolding:cognitive
+165,Verbal scaffolding,Parent,309.33,310.25,0.92,affective,Verbal scaffolding:affective
+166,Verbal scaffolding,Parent,314.63,315.63,1.0,affective,Verbal scaffolding:affective
+167,Verbal scaffolding,Parent,316.61,318.53,1.92,cognitive,Verbal scaffolding:cognitive
+168,Verbal scaffolding,Parent,318.81,320.09,1.28,cognitive,Verbal scaffolding:cognitive
+169,Verbal scaffolding,Parent,330.36,332.98,2.62,cognitive,Verbal scaffolding:cognitive
+170,Verbal scaffolding,Parent,333.29,335.31,2.02,cognitive,Verbal scaffolding:cognitive
+171,Verbal scaffolding,Parent,336.3,336.94,0.64,cognitive,Verbal scaffolding:cognitive
+172,Verbal scaffolding,Parent,338.22,339.62,1.4,cognitive,Verbal scaffolding:cognitive
+173,Verbal scaffolding,Parent,340.08,341.4,1.32,affective,Verbal scaffolding:affective
+174,Verbal scaffolding,Parent,353.40999999999997,358.17,4.76,cognitive,Verbal scaffolding:cognitive
+175,Verbal scaffolding,Parent,367.6,368.68,1.08,cognitive,Verbal scaffolding:cognitive
+176,Verbal scaffolding,Parent,369.22,369.86,0.64,cognitive,Verbal scaffolding:cognitive
+177,Verbal scaffolding,Parent,371.92,375.26,3.34,cognitive,Verbal scaffolding:cognitive
+178,Verbal scaffolding,Parent,376.65,379.97,3.32,cognitive,Verbal scaffolding:cognitive
+179,Verbal scaffolding,Parent,383.21,384.27,1.06,cognitive,Verbal scaffolding:cognitive
+180,Verbal scaffolding,Parent,404.4,405.96,1.56,cognitive,Verbal scaffolding:cognitive
+181,Verbal scaffolding,Parent,406.72,410.15999999999997,3.44,cognitive,Verbal scaffolding:cognitive
+182,Verbal scaffolding,Parent,412.49,413.67,1.18,cognitive,Verbal scaffolding:cognitive
+183,Non-verbal scaffolding,Parent,95.65,96.35,0.7,technical,Non-verbal scaffolding:technical
+184,Non-verbal scaffolding,Parent,97.74000000000001,98.3,0.56,technical,Non-verbal scaffolding:technical
+185,Non-verbal scaffolding,Parent,105.43,106.35,0.92,technical,Non-verbal scaffolding:technical
+186,Non-verbal scaffolding,Parent,252.73,253.47,0.74,technical,Non-verbal scaffolding:technical
+187,Parent gesture,Parent,87.78,88.12,0.34,point at prop,Parent gesture:point at prop
+188,Parent gesture,Parent,118.2,119.7,1.5,point at prop,Parent gesture:point at prop
+189,Parent gesture,Parent,174.61,175.63,1.02,point at prop,Parent gesture:point at prop
+190,Parent gesture,Parent,235.88,237.06,1.18,point at prop,Parent gesture:point at prop
+191,Child prop manipulation,Child,90.85,91.15,0.3,child,Child prop manipulation:child
+192,Child prop manipulation,Child,93.6,94.46000000000001,0.86,child,Child prop manipulation:child
+193,Child prop manipulation,Child,117.83,120.77,2.94,child,Child prop manipulation:child
+194,Child prop manipulation,Child,131.65,133.51,1.86,child,Child prop manipulation:child
+195,Child prop manipulation,Child,148.39,149.85,1.46,child,Child prop manipulation:child
+196,Child prop manipulation,Child,150.92000000000002,155.26,4.34,child,Child prop manipulation:child
+197,Child prop manipulation,Child,178.56,179.44,0.88,child,Child prop manipulation:child
+198,Child prop manipulation,Child,191.68,192.28,0.6,child,Child prop manipulation:child
+199,Child prop manipulation,Child,207.94,211.14,3.2,child,Child prop manipulation:child
+200,Child prop manipulation,Child,221.06,221.86,0.8,child,Child prop manipulation:child
+201,Child prop manipulation,Child,238.31,239.32999999999998,1.02,child,Child prop manipulation:child
+202,Child prop manipulation,Child,250.87,251.43,0.56,child,Child prop manipulation:child
+203,Child prop manipulation,Child,270.68,272.56,1.88,child,Child prop manipulation:child
+204,Child prop manipulation,Child,274.28,275.98,1.7,child,Child prop manipulation:child
+205,Child prop manipulation,Child,277.78,278.86,1.08,child,Child prop manipulation:child
+206,Child prop manipulation,Child,281.8,282.74,0.94,child,Child prop manipulation:child
+207,Child prop manipulation,Child,285.27,285.87,0.6,child,Child prop manipulation:child
+208,Child prop manipulation,Child,288.40999999999997,290.37,1.96,child,Child prop manipulation:child
+209,Parent prop manipulation,Parent,99.74000000000001,100.64,0.9,parent,Parent prop manipulation:parent
+210,Parent prop manipulation,Parent,100.67,101.55,0.88,parent,Parent prop manipulation:parent
+211,Parent prop manipulation,Parent,101.55,102.11,0.56,parent,Parent prop manipulation:parent
+212,Parent prop manipulation,Parent,239.38,240.48,1.1,parent,Parent prop manipulation:parent
+213,Parent prop manipulation,Parent,252.73,253.47,0.74,parent,Parent prop manipulation:parent
+214,Parent prop manipulation,Parent,276.51,277.29,0.78,parent,Parent prop manipulation:parent
+215,Parent prop manipulation,Parent,291.11,291.47,0.36,parent,Parent prop manipulation:parent
+216,Parent prop manipulation,Parent,291.95,292.73,0.78,parent,Parent prop manipulation:parent
+217,robot pointing,robot,24.7,26.225,1.525,point at prop,robot pointing:point at prop
+218,robot pointing,robot,32.7,34.225,1.525,point at prop,robot pointing:point at prop
+219,robot pointing,robot,40.9,42.1,1.2,point at prop,robot pointing:point at prop
+220,robot pointing,robot,49.075,50.6,1.525,point at prop,robot pointing:point at prop
+221,robot pointing,robot,60.225,61.525,1.3,point at prop,robot pointing:point at prop
+222,robot pointing,robot,80.25,82.55,2.3,point at prop,robot pointing:point at prop
+223,robot pointing,robot,107.55,109.7,2.15,point at prop,robot pointing:point at prop
+224,robot pointing,robot,138.55,141.175,2.625,point at prop,robot pointing:point at prop
+225,robot pointing,robot,149.975,152.625,2.65,point at prop,robot pointing:point at prop
+226,robot pointing,robot,154.125,156.725,2.6,point at prop,robot pointing:point at prop
+227,robot pointing,robot,264.375,266.575,2.2,point at prop,robot pointing:point at prop
+228,robot pointing,robot,268.65,271.05,2.4,point at prop,robot pointing:point at prop
+229,robot pointing,robot,273.675,275.675,2.0,point at prop,robot pointing:point at prop
+230,robot pointing,robot,278.575,280.95,2.375,point at prop,robot pointing:point at prop
+231,robot pointing,robot,283.925,286.35,2.425,point at prop,robot pointing:point at prop
+232,robot pointing,robot,293.675,296.075,2.4,point at prop,robot pointing:point at prop
+233,robot text,robot,4.125,5.175,1.05,other,robot text:other
+234,robot text,robot,8.5,10.675,2.175,other,robot text:other
+235,robot text,robot,13.1,15.95,2.85,other,robot text:other
+236,robot text,robot,19.55,70.375,50.825,song,robot text:song
+237,robot text,robot,75.7,77.475,1.775,other,robot text:other
+238,robot text,robot,80.5,83.2,2.7,teach,robot text:teach
+239,robot text,robot,92.025,95.375,3.35,positive feedback,robot text:positive feedback
+240,robot text,robot,97.35,99.975,2.625,put down,robot text:put down
+241,robot text,robot,103.05,105.8,2.75,positive feedback,robot text:positive feedback
+242,robot text,robot,107.85,110.325,2.475,teach,robot text:teach
+243,robot text,robot,111.825,114.65,2.825,pick up,robot text:pick up
+244,robot text,robot,120.75,124.2,3.45,positive feedback,robot text:positive feedback
+245,robot text,robot,126.088,128.913,2.825,put down,robot text:put down
+246,robot text,robot,133.9,137.025,3.125,positive feedback,robot text:positive feedback
+247,robot text,robot,138.925,142.125,3.2,teach,robot text:teach
+248,robot text,robot,143.213,146.488,3.275,pick up,robot text:pick up
+249,robot text,robot,150.225,153.725,3.5,teach,robot text:teach
+250,robot text,robot,154.2,157.75,3.55,teach,robot text:teach
+251,robot text,robot,159.4,163.25,3.85,try again,robot text:try again
+252,robot text,robot,163.65,166.6,2.95,pick up,robot text:pick up
+253,robot text,robot,177.75,181.225,3.475,pick up,robot text:pick up
+254,robot text,robot,182.55,185.725,3.175,positive feedback,robot text:positive feedback
+255,robot text,robot,187.425,190.475,3.05,put down,robot text:put down
+256,robot text,robot,192.775,195.95,3.175,positive feedback,robot text:positive feedback
+257,robot text,robot,198.3,201.65,3.35,teach,robot text:teach
+258,robot text,robot,203.2,205.825,2.625,pick up,robot text:pick up
+259,robot text,robot,211.2,214.65,3.45,positive feedback,robot text:positive feedback
+260,robot text,robot,215.95,218.9,2.95,put down,robot text:put down
+261,robot text,robot,222.4,225.75,3.35,positive feedback,robot text:positive feedback
+262,robot text,robot,226.975,230.025,3.05,teach,robot text:teach
+263,robot text,robot,231.725,234.525,2.8,pick up,robot text:pick up
+264,robot text,robot,241.05,244.2,3.15,positive feedback,robot text:positive feedback
+265,robot text,robot,246.45,249.45,3.0,put down,robot text:put down
+266,robot text,robot,254.6,257.65,3.05,positive feedback,robot text:positive feedback
+267,robot text,robot,259.425,261.75,2.325,other,robot text:other
+268,robot text,robot,264.575,267.675,3.1,teach,robot text:teach
+269,robot text,robot,268.85,271.925,3.075,teach,robot text:teach
+270,robot text,robot,273.85,276.325,2.475,teach,robot text:teach
+271,robot text,robot,278.675,281.55,2.875,teach,robot text:teach
+272,robot text,robot,284.15,286.65,2.5,teach,robot text:teach
+273,robot text,robot,288.325,290.65,2.325,pick up,robot text:pick up
+274,robot text,robot,293.925,296.525,2.6,teach,robot text:teach
+275,robot text,robot,298.5,301.375,2.875,try again,robot text:try again
+276,robot text,robot,302.375,304.975,2.6,pick up,robot text:pick up
+277,robot text,robot,311.35,313.95,2.6,positive feedback,robot text:positive feedback
+278,robot text,robot,316.375,318.6,2.225,put down,robot text:put down
+279,robot text,robot,322.5,324.75,2.25,positive feedback,robot text:positive feedback
+280,robot text,robot,327.05,329.9,2.85,pick up,robot text:pick up
+281,robot text,robot,341.3,344.175,2.875,pick up,robot text:pick up
+282,robot text,robot,345.625,348.475,2.85,positive feedback,robot text:positive feedback
+283,robot text,robot,350.4,353.5,3.1,put down,robot text:put down
+284,robot text,robot,360.45,363.775,3.325,positive feedback,robot text:positive feedback
+285,robot text,robot,365.6,368.0,2.4,pick up,robot text:pick up
+286,robot text,robot,379.75,382.725,2.975,pick up,robot text:pick up
+287,robot text,robot,409.75,412.625,2.875,pick up,robot text:pick up
+288,start-end,start-end,4.05,4.2,0.15,start,start-end:start
+289,start-end,start-end,419.65,419.85,0.2,end,start-end:end
+290,Conversational turns,"Parent,Child",152.56,157.05,4.490000000000009,PC,Conversational turns:PC
+291,Conversational turns,"Parent,Child",230.59,233.1,2.509999999999991,PC,Conversational turns:PC
+292,Conversational turns,"Parent,Child",286.46,291.79,5.330000000000041,PC,Conversational turns:PC
+293,Conversational turns,"Parent,Child",287.5,291.79,4.2900000000000205,PC,Conversational turns:PC
+294,Conversational turns,"Parent,Child",292.96,296.13,3.170000000000016,PC,Conversational turns:PC
+295,Conversational turns,"Parent,Child",376.65,384.7,8.050000000000011,PC,Conversational turns:PC
+296,Conversational turns,"Parent,Child",383.21,384.7,1.490000000000009,PC,Conversational turns:PC
+297,Conversational turns,"Parent,Child",384.8,386.25,1.4499999999999886,PC,Conversational turns:PC
+298,Conversational turns,"Parent,Child",406.72,412.52,5.7999999999999545,PC,Conversational turns:PC
+299,Conversational turns,"Parent,Child",412.49,414.7,2.2099999999999795,PC,Conversational turns:PC
+300,Conversational turns,"Parent,Child",156.47,160.38,3.9099999999999966,CP,Conversational turns:CP
+301,Conversational turns,"Parent,Child",188.73,192.79,4.060000000000002,CP,Conversational turns:CP
+302,Conversational turns,"Parent,Child",291.25,294.1,2.8500000000000227,CP,Conversational turns:CP
+303,Conversational turns,"Parent,Child",295.17,298.40999999999997,3.2399999999999523,CP,Conversational turns:CP
+304,Conversational turns,"Parent,Child",351.26,358.17,6.910000000000025,CP,Conversational turns:CP
+305,Conversational turns,"Parent,Child",384.24,386.79,2.5500000000000114,CP,Conversational turns:CP
+306,Conversational turns,"Parent,Child",385.91,390.53,4.619999999999948,CP,Conversational turns:CP
+307,Conversational turns,"Parent,Child",411.88,416.3,4.420000000000016,CP,Conversational turns:CP
+308,Conversational turns,"Parent,Child",413.72,416.3,2.579999999999984,CP,Conversational turns:CP
+309,Conversational turns,"Parent,Child",152.56,160.38,7.819999999999993,PCP,Conversational turns:PCP
+310,Conversational turns,"Parent,Child",286.46,294.1,7.640000000000043,PCP,Conversational turns:PCP
+311,Conversational turns,"Parent,Child",287.5,294.1,6.600000000000023,PCP,Conversational turns:PCP
+312,Conversational turns,"Parent,Child",292.96,298.40999999999997,5.449999999999989,PCP,Conversational turns:PCP
+313,Conversational turns,"Parent,Child",376.65,386.79,10.140000000000043,PCP,Conversational turns:PCP
+314,Conversational turns,"Parent,Child",383.21,386.79,3.580000000000041,PCP,Conversational turns:PCP
+315,Conversational turns,"Parent,Child",384.8,390.53,5.729999999999961,PCP,Conversational turns:PCP
+316,Conversational turns,"Parent,Child",406.72,416.3,9.579999999999984,PCP,Conversational turns:PCP
+317,Conversational turns,"Parent,Child",412.49,416.3,3.8100000000000023,PCP,Conversational turns:PCP
+318,Conversational turns,"Parent,Child",291.25,296.13,4.8799999999999955,CPC,Conversational turns:CPC
