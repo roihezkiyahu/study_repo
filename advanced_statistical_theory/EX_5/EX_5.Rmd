@@ -28,13 +28,15 @@ R(\mu, \delta) = E_Y((\mu-\delta)^2) = Bias(\delta,\mu)^2 + V(\delta) = (c-1)^2\
 \\
 \delta^* = \underset {\delta}{argmin} \ \underset{\mu}{sup} \ R(\mu, \delta) = \underset {\delta}{argmin} \ \underset{\mu}{sup} \ E_Y((\mu-\delta)^2)
 \\
-\quad \text{in order to maximize the risk function we want } \mu \text{ to be as far as large as possibe }
+\quad \text{in order to maximize the risk function we want } \mu \text{ to be as large as possibe }
 \\
 \mu^* = a \Rightarrow c^*= \underset {c}{argmin} (c-1)^2a^2  + c^2\sigma^2
 \\
 \frac{\partial (c-1)^2a^2  + c^2\sigma^2}{\partial c} = ca-a+c\sigma^2 = 0 \iff c = \frac{a^2}{a^2 + \sigma^2}\Rightarrow c^* = \frac{a^2}{a^2 + \sigma^2}
 \\
 \text{thus we get: } \hat \mu_c = \frac{a^2}{a^2 + \sigma^2} y
+\\
+\text{plugging it in the risk function yields: } (\frac{\sigma^2}{a^2 + \sigma^2})^2\mu^2  + (\frac{a^2}{a^2 + \sigma^2})^2\sigma^2
 $$
 
 #### ii
@@ -146,28 +148,28 @@ difine: a = 0 \Rightarrow accept \ H_0, \quad a = 1 \Rightarrow accept \ H_1
 \\
 p_{yi} = P(\theta = \theta_i |y)
 \\
-L(\theta, a) = aL_1I(\theta = \theta_0) + (1-a)L_0I(\theta = \theta_1)
+L(\theta, a) = aL_0I(\theta = \theta_0) + (1-a)L_1I(\theta = \theta_1)
 \\
-\rho (\theta, \delta) = E_{\theta|y}(L(\theta, a)) = \delta L_1 p_{y0} + (1-\delta)L_0p_{y1} = \delta (L_1p_{y0} - L_0p_{y1}) + L_0p_{y1}
+\rho (\theta, \delta) = E_{\theta|y}(L(\theta, a)) = \delta L_0 p_{y0} + (1-\delta)L_1p_{y1} = \delta (L_0p_{y0} - L_1p_{y1}) + L_1p_{y1}
 \\
-\delta^* = argmin_\delta\ \delta (L_1p_{y0} - L_0p_{y1}) + L_0p_{y1}
+\delta^* = argmin_\delta\ \delta (L_0p_{y0} - L_1p_{y1}) + L_1p_{y1}
 \\
-\text{thus if: } \delta^* = I(L_1p_{y0} < L_0p_{y1})
+\text{thus if: } \delta^* = I(L_0p_{y0} < L_1p_{y1})
 \\
 p_{y0} = P(\theta = \theta_0 |y) = \frac{f(y|\theta_0) p_0}{ f(y)}
 \\
 p_{y1} = P(\theta = \theta_1 |y) = \frac{f(y|\theta_1) p_1}{ f(y)} = \frac{f(y|\theta) (1-p_0)}{ f(y)}
 \\
-L_1p_{y0} < L_0p_{y1} \iff \frac{p_{y1}}{p_{y0}} < \frac{L_0}{L_1} \iff  \frac{\frac{f(y|\theta_0) p_0}{ f(y)}}{\frac{f(y|\theta_1) (1-p_0)}{ f(y)}} < \frac{L_0}{L_1} \iff \frac{f(y|\theta_0)}{f(y|\theta_1)} < \frac{(1-p_0)L_0}{p_0L_1}
+L_0p_{y0} < L_1p_{y1} \iff \frac{p_{y0}}{p_{y1}} < \frac{L_1}{L_0} \iff  \frac{\frac{f(y|\theta_0) p_0}{ f(y)}}{\frac{f(y|\theta_1) (1-p_0)}{ f(y)}} < \frac{L_1}{L_0} \iff \frac{f(y|\theta_0)}{f(y|\theta_1)} < \frac{(1-p_0)L_1}{p_0L_0}
 \\
-\text{thus the bayes testing rule is: }  \frac{p_0L_1}{(1-p_0)L_0} < \frac{f(y|\theta_1)}{f(y|\theta_0)}
+\text{thus the bayes testing rule is: }  \frac{p_0L_0}{(1-p_0)L_1} < \frac{f(y|\theta_1)}{f(y|\theta_0)}
 $$
 
 ### b
 
 
 $$
-\text{this is a liklihood ratio test and thus a most powerfull test. the critical values of the test is: } \frac{p_0L_1}{(1-p_0)L_0}
+\text{this is a liklihood ratio test and thus a most powerfull test. the critical values of the test is: } \frac{p_0L_0}{(1-p_0)L_1}
 $$
 
 
