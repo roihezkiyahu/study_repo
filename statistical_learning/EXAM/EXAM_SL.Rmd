@@ -22,7 +22,7 @@ library(keras)
 
 # Q1
 
-* loading the data
+loading the data:
 
 ```{r}
 df_train <- read.table("zip.train") %>% rename("y" = "V1") %>%
@@ -41,14 +41,13 @@ y_test = df_test[,1]
 * using PCA
 
 ```{r}
-?prcomp
 pca <- prcomp(X_train)
 plot(cumsum(pca$sdev/sum(pca$sdev)),
      xlab = "PC",
      ylab = "Cumulative Proportion of Variance Explained")
 ```
 
-* i will take 100 PCS which explaines ~ 75% of the variance in the data.
+i will take 100 PCS which explaines ~ 75% of the variance in the data.
 
 
 ```{r}
@@ -84,16 +83,19 @@ lda_train_results = get_results(lda_full, X_train, y_train, TRUE)
 lda_test_results = get_results(lda_full, X_test, y_test, TRUE)
 lda_pca_train_results = get_results(lda_pca, X_pca_train_100, y_train, TRUE)
 lda_pca_test_results = get_results(lda_pca, X_pca_test_100, y_test, TRUE)
+```
+
+```{r echo=FALSE}
 tibble(model_dataset = c("lda train", "lda test", "lda with pca train", "lda with pca test"),
        err = c(lda_train_results$classification_err, lda_test_results$classification_err, lda_pca_train_results$classification_err,  lda_pca_test_results$classification_err))
 ```
 
 
-* we can see that both the model with the PCA and the model without the PCA preform rather similar on the test set (9.5% error) but the model on the full data tends to overfits more then the PCA. meaning the PCA here helps reduce the overfit.
+we can see that both the model with the PCA and the model without the PCA preform rather similar on the test set (9.5% error) but the model on the full data tends to overfits more then the PCA. meaning the PCA here helps reduce the overfit.
 
-* lets take a look at the confution matrix of the full LDA
+lets take a look at the confution matrix of the full LDA
 
-* train:
+train:
 
 ```{r echo=FALSE}
 lda_train_results$conf_matrix
@@ -101,17 +103,17 @@ lda_train_results$conf_matrix
 
 we can see that the model struggels more to distinguish between 5 and 3, after that it has a hard time with 3 and 2, and can seperate well enougth 5 and 2
 
-* test:
+test:
 
 ```{r echo=FALSE}
 lda_test_results$conf_matrix
 ```
-* we can see in general the same behavior as in the train set, but with larger percentage of mistake, notice that the test set is smaller then the train set and that we have higher values outside the diagonal (which indicate false prediction)
+we can see in general the same behavior as in the train set, but with larger percentage of mistake, notice that the test set is smaller then the train set and that we have higher values outside the diagonal (which indicate false prediction)
 
 
 ### 1.b
 
-```{r}
+```{r message=FALSE}
 multinom_full = multinom(y~., df_train)
 multinom_pca = multinom(y~., df_pca_train_100)
 ```
@@ -122,45 +124,49 @@ multinom_train_results = get_results(multinom_full, X_train, y_train, FALSE)
 multinom_test_results = get_results(multinom_full, X_test, y_test, FALSE)
 multinom_pca_train_results = get_results(multinom_pca, X_pca_train_100, y_train, FALSE)
 multinom_pca_test_results = get_results(multinom_pca, X_pca_test_100, y_test, FALSE)
+```
+
+```{r echo=FALSE}
 tibble(model_dataset = c("multinom train", "multinom test", "multinom with pca train", "multinom with pca test"),
        err = c(multinom_train_results$classification_err, multinom_test_results$classification_err, multinom_pca_train_results$classification_err,  multinom_pca_test_results$classification_err))
 ```
 
 
-* clearly we overfit the data, we can see a train error of 0, which means that in the train set we are able to classify each observation to the correct y value, but for the test set we have much larger errors 14.5% for the full multi-class logistic regression, and 9.35% for the multi-class logistic regression with PCA.
-* we see that in this case the PCA helps improve the results of the model, also the multi-class logistic regression with PCA has similar results to the LDA
+
+clearly we overfit the data, we can see a train error of 0, which means that in the train set we are able to classify each observation to the correct y value, but for the test set we have much larger errors 14.5% for the full multi-class logistic regression, and 9.35% for the multi-class logistic regression with PCA.
+we see that in this case the PCA helps improve the results of the model, also the multi-class logistic regression with PCA has similar results to the LDA
 
 
-* lets take a look at the confution matrix of the PCA multi-class logistic regression
-* the train has perfect score thus the confution matrix is diagonal and not that interesting, lets see the test confution matrix:
+lets take a look at the confution matrix of the PCA multi-class logistic regression
+the train has perfect score thus the confution matrix is diagonal and not that interesting, lets see the test confution matrix:
 
 
 ```{r echo=FALSE}
 multinom_pca_test_results$conf_matrix
 ```
 
-* we can see a rather similar performance, the model struggles the most with 5 and 3, after that with 3 and 2, and is rather ok with 5 and 2.
+we can see a rather similar performance, the model struggles the most with 5 and 3, after that with 3 and 2, and is rather ok with 5 and 2.
 
 
 ### 1.c
 
-* we are using images, and as we know the SOTA for image predictive modeling are CNNS so lets make a CNN to predict the class 
+we are using images, and as we know the SOTA for image predictive modeling are CNNS so lets make a CNN to predict the class 
 
-* first lets prepare the data:
+first lets prepare the data:
 - the loss expects values to be between 0-2, so i will reencode 5 => 0, 2=> 1, 3 => 2
 
 ```{r}
 X_train_net = array_reshape(as.matrix(X_train), c(nrow(X_train),16,16,1))
-y_train_net = y_train
-y_train_net[y_train_net == 5] = 1
+y_train_net = y_train-1
+y_train_net[y_train_net == 4] = 0
 
 X_test_net = array_reshape(as.matrix(X_test), c(nrow(X_test),16,16,1))
-y_test_net = y_test
-y_test_net[y_test_net == 5] = 1
+y_test_net = y_test-1
+y_test_net[y_test_net == 4] = 0
 ```
 
 
-* now create and train the model
+now create and train the model
 
 ```{r message=FALSE}
 cnn_model <- keras_model_sequential() %>%
@@ -182,7 +188,7 @@ summary(cnn_model)
 
 ```{r}
 cnn_model %>% compile(loss = 'sparse_categorical_crossentropy',optimizer = optimizer_adam(learning_rate = 0.0001),metrics = c('accuracy'))
-cnn_model %>% fit(X_train_net, y_train_net-1, batch_size = 64,epochs = 100,verbose = 1,
+cnn_model %>% fit(X_train_net, y_train_net, batch_size = 64,epochs = 100,verbose = 1,
                   class_weight = list("0" = 1.5, "1" = 0.7, "2" = 1))
 ```
 
@@ -195,25 +201,76 @@ tibble(model_dataset = c("neural net train", "neural net test"),
        err = c(cnn_train_res$classification_err, cnn_test_res$classification_err))
 ```
 
-* we can see that this model is far better then the ones before, also it still has a much lower error in the train set, we can keep playing with the paramaters of the model (add some more regularization or use data augmentation -[which for some reason doesnt work for me in r]) to get even better results
+we can see that this model is far better then the ones before, also it still has a much lower error in the train set, we can keep playing with the paramaters of the model (add some more regularization or use data augmentation -[which for some reason doesnt work for me in r]) to get even better results
 
 
-* lets take a look at the test confution matrix
+lets take a look at the test confution matrix
 
 
 ```{r echo=FALSE}
 cnn_test_res$conf_matrix
 ```
 
-* we can see that the results are much better, we still some dificulties with the 5's which is most chakkenging to classify.
+we can see that the results are much better, we still some dificulties with the 5's which is most chakkenging to classify.
 
-* the over all results:
+the over all results:
 
 ```{r echo=FALSE}
 tibble(model_dataset = c("lda train", "lda test", "lda with pca train", "lda with pca test", "multinom train", "multinom test", "multinom with pca train", "multinom with pca test", "neural net train", "neural net test"),
        err = c(lda_train_results$classification_err, lda_test_results$classification_err, lda_pca_train_results$classification_err,  lda_pca_test_results$classification_err, multinom_train_results$classification_err, multinom_test_results$classification_err, multinom_pca_train_results$classification_err,  multinom_pca_test_results$classification_err, cnn_train_res$classification_err, cnn_test_res$classification_err)) %>% arrange(err)
 ```
 
-* we can see from the full results that the multinom and neural net both have perfect score on the train set, also the neural net has the best results on the test set, and even better results on the rest set then other models get on the train set!
+we can see from the full results that the multinom and neural net both have perfect score on the train set, also the neural net has the best results on the test set, and even better results on the rest set then other models get on the train set!
+
+
+
+# Q2
+
+### 2a.i
+
+x has many categorical variables and missing values, accuracy is critical
+
+good models can be - random forest and gradient boosting, both models have lower variance due to the fact that they average many predictors which will result in better accuracy, also both of them can handle missing values
+
+bad models can be:  Linear regression - LR will probably preform not that good as it can't handle missing values well.
+
+### 2a.ii
+
+x has many categorical variables and missing values, speed of model building is critical
+
+good: Two models that can be good given the proper processing of missing values can be Logistic regression for classification and Linear regression for regression problems. they are both fast to train and run inference, but both will have a hard time with the high dimension so we can use lasso as a feature selection technique and thus reduce the dimension or ridge to shrink the coefficients.
+*a proper way for processing the missing values could be to set a new category "missing" for each categorical feature with missing values, after that we can use one hot encoding. it might even surprise us with very good predictions if the data is not missing at random and might have a connection to our target.
+
+bad models: Random forest, Boosting, both these models can achieve high accuracy and tree based models can handle missing values as well, but they will take a larger time to train and also run inference, each observation mush have prediction from all the trees and usually we want a lot of trees to be accurate, also each tree inference time is rather costly.
+K-nn will also not be that good here as for each new observation we need to calculate thee distance to all points in the train set in order to find the K closest ones
+
+### 2a.iii
+
+Large n, small p, you believe that there are complex dependencies between x and y (not only main effects / additive / low order)
+
+good - gradient boosting, random forest, deep learning and kernel machines can model complex dependencies between x and y thus all of them will be good in this case, also because we have a large number of samples and not many variables they will likely perform well without any regularization.
+the tree based models can capture complex dependencies as they split the sub space, neural nets can capture complex dependencies by using nonlinear activation functions, and kernel machines can capture complex dependencies by the nature of the dimention increacment
+
+
+bad - Linear regression for regression, Logistic regression for classification, LDA for classification, all of these models assume some form of linearity thus will not be cable to capture complex dependencies between x and y and will probably preform poorly
+
+### 2a.iv
+
+Small n, large p, you believe only a small number of variables are important
+
+Good - Lasso: will help reduce the dimension of the problem by setting some of the coefficients to zero and keeping the important coefiecents.
+We can use lasso as a model, but also as a feature selection technique and then use all of the other models as with the selected features.
+We can also use PCA to reduce p and afterwards we can use all the models (if we can find a d dimensional subspace where d<<n)
+
+Bad - linear regression will be very bad due to the fact that $X^tX$ is not invertible. also without any regularization we can't expect any of the other models to perform well when p>>n
+
+### 2b
+
+LDA assumption:  we assume that $X|Y_i \sim N(\mu_i, \Sigma)$
+
+LR assumption: the model that we have for the linear regression is $y = X\beta + \varepsilon$ we assume that $\varepsilon \sim N(0,\sigma^2)$
+
+Ridge assumption: Ridge assumes a normal prior for $\beta$ meaning: $\beta \sim N(0, \tau^2I)$
+
 
 

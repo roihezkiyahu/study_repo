@@ -9,7 +9,7 @@
 <meta http-equiv="X-UA-Compatible" content="IE=EDGE" />
 
 
-<meta name="author" content="roi hezkiyahu" />
+<meta name="author" content="roi hezkiyahu - 205884018" />
 
 <meta name="date" content="2023-01-23" />
 
@@ -351,17 +351,299 @@ display: none;
 
 
 <h1 class="title toc-ignore">EXAM_SL</h1>
-<h4 class="author">roi hezkiyahu</h4>
+<h4 class="author">roi hezkiyahu - 205884018</h4>
 <h4 class="date">2023-01-23</h4>
 
 </div>
 
 
-<p><span class="math display">\[
-\frac{\partial }{\lambda}  \frac{\partial }{\lambda} D_{ii}^2(D_{ii}^2 +
-\lambda)^{-1} = \frac{\partial }{\lambda}  -1 D_{ii}^2(D_{ii}^2 +
-\lambda)^{-2} = (-1)*(-2)* D_{ii}^2(D_{ii}^2 + \lambda)^{-3}
-\]</span></p>
+<div id="imports" class="section level3">
+<h3>imports</h3>
+<pre class="r"><code>library(dplyr)
+library(ggplot2)
+library(purrr)
+library(caret)
+library(class)
+library(MASS)
+library(tidyverse)
+library(nnet)
+library(keras)</code></pre>
+</div>
+<div id="q1" class="section level1">
+<h1>Q1</h1>
+<ul>
+<li>loading the data</li>
+</ul>
+<pre class="r"><code>df_train &lt;- read.table(&quot;zip.train&quot;) %&gt;% rename(&quot;y&quot; = &quot;V1&quot;) %&gt;%
+  filter(y %in% c(2,3,5))
+df_test &lt;- read.table(&quot;zip.test&quot;) %&gt;% rename(&quot;y&quot; = &quot;V1&quot;) %&gt;%
+  filter(y %in% c(2,3,5))
+X_train = df_train[,2:257]
+y_train = df_train[,1]
+X_test = df_test[,2:257]
+y_test = df_test[,1]</code></pre>
+<div id="a" class="section level3">
+<h3>1.a</h3>
+<ul>
+<li>using PCA</li>
+</ul>
+<pre class="r"><code>?prcomp</code></pre>
+<pre><code>## starting httpd help server ... done</code></pre>
+<pre class="r"><code>pca &lt;- prcomp(X_train)
+plot(cumsum(pca$sdev/sum(pca$sdev)),
+     xlab = &quot;PC&quot;,
+     ylab = &quot;Cumulative Proportion of Variance Explained&quot;)</code></pre>
+<p><img src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAABUAAAAPACAMAAADDuCPrAAAA2FBMVEUAAAAAADoAAGYAOjoAOmYAOpAAZrY6AAA6OgA6Ojo6OmY6ZmY6ZpA6ZrY6kLY6kNtmAABmADpmOgBmOjpmOmZmZjpmZmZmZpBmkLZmkNtmtrZmtttmtv+QOgCQZjqQZmaQZraQkGaQkJCQkLaQtraQttuQtv+Q2/+2ZgC2Zjq2kDq2kGa2kJC2kLa2tpC2tra2ttu227a229u22/+2///bkDrbkGbbkJDbtmbbtpDbtrbbttvb25Db27bb29vb2//b////tmb/25D/27b/29v//7b//9v///9NJYyVAAAACXBIWXMAAB2HAAAdhwGP5fFlAAAgAElEQVR4nO3dC3vTSKImYLk7dAhDH9iw7WYODeyeA0sYzmKW7swCO6Q7XJz//4/W8i3yJY5Vlkoq6X2fZ5rEE2RVZH3UXdkVAEGypk8AIFUCFCCQAAUIJEABAglQgEACFCCQAAUIJEABAglQgEACFCCQAAUIJEABAglQgEACFCCQAAUIJEABAglQgEACFCCQAAUIJEABAglQgEACFCCQAAUIJEABAglQgEACFCCQAAUIJEABAglQgEACFCCQAAUIJEABAglQgEACFCCQAAUIJEABAglQgEACFCCQAAUIJEABAglQgEACFCCQAAUIJEABAglQgEACFCCQAAUIJEABAglQgEACFCCQAAUIJEABAglQgEACFCCQAAUIJEABAglQgEACFCCQAAUIJEABAglQgEACFCCQAAUIJEABAglQgEACFCCQAAUIJEABAglQgEACFCCQAAUIJEABAglQgEACFCCQAAUIJEABAglQgEACFCCQAAUIJEABAglQgEACFCCQAAUIJEABAglQgEACFCCQAAUIJEABAglQgEACFCCQAAUIJEABAglQgEACFCCQAAUIJEABAglQgEACFCCQAAUIJEABAglQgEACFCCQAAUIJEABAglQgEACFCCQAAUIJEABAglQgEACFCCQAAUIJEABAglQgEACFCCQAAUIJEABAglQgEACFCCQAAUIJEABAglQgEACFCCQAAUIJEABAglQgEACFCCQAAUIJEABAglQgEACFCCQAAUIJEABAglQgEACFCCQAAUIJEABAglQgEACFCCQAAUIJEABAglQgEDFAB1/Gm3z7q/Gzg6gxYoB+v1hts0PfzR2dgAtJkABAm1twj/LssH9F6PR/zzOBo814QG22jaIdJ5l//bX8ssHUc8HIBlbAvQyy35afnOWZb9FPB2AdGwG6PhpNni1/O7LcXZHEx5gi80A/f6wOGy0+h0ASwIUINDWJnyh2/My04QH2GrLINJ5Yern14eG4QG22xKg+Xz6o5f5V+MPx+bRA9xg2zzQy9kKpJPpfwsj8gAUbN2N6cvpch3n0e+xzwggETdsZ/f52d1Jev54/33cs1m3dW0+QJDqI6ryI1ao6d820C2VZ1TVB1w3vsi3KHl3ETIXqoZ/MIDeiheg36YbKY//POzon58Vsr98f4AABaoTK0A/5D2gP/xx9f3hIYNIX0/Xqs9Hr0qenAAFKhMpQF9P424aoAdMY7o8zo9yMpzJIzkblNvZSYAC1YkToOd5ZfE/jicBmi/rDF3Jmc/HH7wsvPCx9Kx8AQpUJ0qAfpkE3ZNJ/uVht7owvpTzjbj8XnZdqAAFqhMlQM+mGyrPAnR1d+UytkVv2Z1JBChQnRgBOt9QeR6gwRsqb9sHr+zeeAIUqE6MAJ2n3DxAg/cDFaBAuyQUoKtPBpnRhAeak1ATPu9KXfubebdoqQ5VAQpUJ9Yg0oNlgJ6HDiJNB/PvFKfhf31adnM8AQpUJ0qAXs7n0OcBmm8NGvpY4/Pp1Pnhi1Hu7Wwmfbnd7QUoUJ0oAZq3tAcv8wAd/yM75JFIH47XlnIOnpQ8OQEKVCbOSqR8wvt16L0KP/j4TTFCB4/LRrEABXYrs1FdpLXweR10sf/HgTvSjz+P3gyHw8ej9wEVWQEKXDt0q89o29l9ne5IP2h4R3oBCn23MzSvw3OvBE1wQ+VDCFDoo91hue2F/dJCgAKdtX9oFv+feVLsERcCFOiUEqF5tVLd3Pa/W9+r8rPf+uqn58NrvwbPY1q3e13o1t8h0Ek3BmfZ0GxdgH5Znb8ZthZ+GwEKfbdHbbNcaLYtQNfyM1qAbjk5AQodUEtts60Bmi/BvPfiYunAJ3MWfSt3MAEKKYsSmi0L0NJ7JtVHgEKCbo7K6oNzOQzflmlMBz2Js1oCFBJSdzN9+ZfXDnm1OOTtJ1h5kTdeCd5CuXoCFBKxq8JZQ2hue5d9TrLyYm+8MmnCC1BgL3vVOiuqad7yJvucbOXF33zpPHwL0IoJUGipXVG2CLuyNc8twblXQO+dE1ECtD1teAEKLXNblGVb8rDS0Dzs5Kv6NSyPuOW1L8fZ4PFF1e8UQIBCi9wWnNkN2XhwcFZXgKqOtDzixisr2ynnmquOClBogZLBuTNA14Kz/tBcLUjlR9x4paIA3ThMwMEEKDQoMDg3s7KJ2ub2AlV+xI1Xvj86WXVPgELf3Bae+4wJ3fB344bmaqEqP2LVB1z6eipAITW3Bece4VmocC5+/KYjRi9c5Ues+oDX8jWh5R5jvE6AQiTVBme28lXjwXldyMqPWPUBC/IEPWhGqQCFCG4Lz32a67cGZ9OFzKUVoAfPKG3HLx06qtpaZ7Pdm3upN0BneVflNKbLwxrxLfvtQ3dUF5zbw7Pp8m2VWoAeuK6+pVcB0nVbrbOTwblQc4A+yqcsVTSNaebLcPi/Dji5dl8NSEsVtc6bgrP14ZlLrA/0UAlcEWi/6mqdiQbnggAFyjig1pl2c30bAQrs69BaZ2eCc6GRAL34q+o33VfCVwqaU02tM/Hm+jaRAnT8drhwctduTJCOwFpn95rr28QJ0Mvjld+cAIUkHBKenQ7OhSgB+mU1P7P7mvDQZruCc0d4dru5vk2UAD3PQ/Ptw2zw729Os2zQ4POROngFoVpqnSXECND5Jkpn041AJmF6p7EKqACFXQLCc2ets+ny1C5GgH6f1D1fTaPzQQUbKh2kB1cUytsVnLeFZ+9qnUWRAjQfNrrMsp+uln80oydXFfan1nmAiAH65XjaeJ9811wbvmdXF3YLDc9e1zqLIvWB5gE6T85GHxLfwysM290UnPuFZ8+DcyHKKPzZtA/0OkcFKDRGk71CsaYx5d2es2H4yyaH4Xt+tem7KpvsTZelFaIEaL6j8iQ0J9H5w/t/PTSIBA04LDzVOreKEqDT6PxjOoMpl7fnG+LK00s3BecN4anJvq84AXr18XTa/Tl9sPvgSdVvuT9Xn145rNapyX6rSAG68HE4fPxn1e9Ygk8BvXFYeKp17iVygDbNJ4FeKBmemuyhBCh0y03BuSs8NdkDCVDoDk32yOoN0I0nws+YSA+VE54NEKCQvhLheWN/Z9NlSFLNAfroZJt7AhSqcFMlcld4Xv+I8DyYPlBIU3h4rv0FwglQSI/wbAkBCmm5KTi3hKf+zrrFC9Dx59FodFH1u5Xkk0PSwmqdwrM2sQL04+n86t37veo3LMOnh1RpsrdRnABd7MM09aDqdyzBJ4gUbaSm8GyJOAF6Nrl8g7/95+i/fmk4QX2KSM3B4dl0ATotSoBeTq7iz39Nvxy/th8o7GlbeGbCs0WiBOhZcRP6MzvSw+1uaIjfPNouPBsQI0C/PyxWOudPN26GTxUpuCE3N6YrmabUtEgBWlj97qmcsMOOSudKgJqm1AYxAnT+POM5AQo3uKXFfl3hNNLeElH6QM+nzzOeu9QHCptuCc+dM5SEZ1OiBOj30+yHxfz51epobD5ltNEe4Vn8IU321og0kf7Z4lmcX0+bnMUkQGmdfcOzMAVUeLZGlEGkRycn+cX+cfbHoMFdQX3iaBPhmbpIo/DbNNGS96mjLUqG59pP0g4CFKI7JDybPneK4vSBtoaPH00Tnl0iQCEa4dk1UQL0z7Xv/6+J9PSO8OyiKH2g/+1J8duvT61Eol+EZ1dFGkS6f719yIdjSznpEeHZZbFG4QcvZ1+Pn2XNjL/P+EgSk/Dsuih9oB+Ps/mOytdfNcPHkliEZx9EW8qZZUev8u3os6OXVb9jCT6axCA8+yLWNKYPx/OPR4PVzysBSv2EZ59Emwf6dfpgzkarn1cClNoJz16JFqDTVvxiT6bG+JhSp2JqCs8+0ISHSqh59lH8QaSBQSS6ZmsuCs8eiBKgH5aTl76YxkTHbMvFTHj2RPSJ9Hkl9I6J9HSC8Ow7SzkhiPDEZiIQQHgyE6UP1HZ2dIrwZC7aPNB28DHmUMXUFJ59Fz9Ax8+HvzY2DO+jzCFuqXneMJ+J7qo3QL8/XAwYfbv4c+O1Bvg4E2prNt5S+2z6nKlbpAAtpKYAJTnbwvOGpvuV8OwTAQo7lQhPVc/eEaCwS/nwlJ89IkDhRsXUFJ5sEqCwlZontxOgsGFrNgpPNghQWLEtG9cDVHgyI0Ch6NbwNNeTawIUloqpuSM8zfVkToDCVNmap48SAhSuDBoRSoDCrn5P4ckOtQfo4MVo4u3x/Ivpl5UE6Pjzu/V9Rvc4OR991tzW7yk8uVntAbrNAQH6aTT6Pf/z62l+oMHfy56cjz8FO2qeRtzZQ1oBOnu6/J2/ri6P54e6U25rUbcAC1srl0bcKaXeAB1/Gm3zLnBD5fP5R/mn6XM+h8O7+dflTs5twMxGeGa7+j2bPltaqt4ArVb+UPmjF28njfdfsuxB/kqeqL+VOYQ7gVwxNW8NT/nJjVIK0LNZi3389LrieVayCupWYEfN06ARJSUUoHlwTqubl5P2+6vZa5NKaaleULdD7+3T7yk82VNCAVrFpFK3RL/t0XQ3aEQJApSe2NF0N2hEoIQCdNKEn7XcJ+12TXjK2Nq1qd+TgyUUoMsRo8mfs0H46TC8QSRus5GPu2qfTZ8sKUkpQC8nn+6fLy5eZ9nJdV3UNCZ20+9JfVIK0GnVM3fnX5PgvD8aPcvKLkVyi/SLfk/qlVSAjl9PP+iT2udiTVLZVaHukl7R70nNkgrQq6vPz0/uPc7rnP+cLYa/X3JRqNukP/ZougtPDpRYgF4bf3o+fFF6Pzu3Sj/s0XTX70kF4gXot+kmIuPye3hWye3SC/s33Zs+UxIXK0A/3J11WH5/ePR71e9Ygjum+zTdiSdSgM5Gf6YBupwE3wS3TLdpuhNXnADNB82P/uN4EqD5jiAlN0Guktum025qupuyRE2iBGg+3/3JpPKZzzla7qlUid1r4dfvGndOl+1quvsUUI8oATpbgzkL0Hw9Ubld5HcRoOT2aLr7BFCDGAE63wVkHqBl9//YyW5MXN3edNfvSU1iBOg85eYBWu1z4b9dlJoX5Rbqnr2b7k2fKB2UeoCW5C7qFk13mpV4E74st1GnaLrTsFiDSA+WAVp2C89KuZW6Q9Od5kUJ0Mv5HPo8QPNNPQ+bxjS+yJ82/+4ipBrrbuoGTXfaIUqA5nM/By/zAB3/IztsIv3nZ4Vb4/770ifnduoCTXdaIs5KpO8PC5/2A5Zyfj1du3OOSh7LLZU+TXfaI9Ja+LwOusi88M1ELqebgJ4MZ+5O07hcd4C7Knma7rRItO3svj7LA29QvtV9La/HDl4WXvh4XHZLerdV0opNdk13WiClDZXPN+Iyj9QHZQ7h1krWau1S051WSChAt21DcllySMrdlarVdrumO+0QLUDH/y8Puu///T+Dh+C3LWGyFr4X1pvuy6813WlWpAD9+ihbrOMc/D3wwAK0l9ab7os/NN1pgTgBerkY7ZnOZyrVa3ltviJ09cCa8B23npLZsuKp6U7zom2oPPh5GnTfXodPBD3bSMu8W7TUulC3WVK2VDxXclPTnYbFWgt/nXxnwWvh8xy+U5xF+vVp2TR2q6Vko+K5rdvTJaVBEXdjmjtgN6b80UrZYPhilHs7m0lfrj/A3ZaM9dpnYcbSWr8oNCbifqBbvyvnw/Fav9fgScmTc7slYlvtszh/XnjSBmkF6NX4TTFCB4/LVmXdckm4qfZ5pelOu0RqwhdmwJcdON842ufRm+Fw+Hj0PuAo7rrWW2tj3Nz32fSJQqRBpPPCWE8+EhQ4j6kCbru2y9YD1GpNWixKgE5nf95/eXFx8SnfzrO5J3oI0HZbb7qv1T7lJ20TZyL9l5Wey1dVv+X+3HtttlfTvemThIJYSzmvN5K/31z9U4C22HrtU9OdBMTbTOTT8+Fw+OvLJuNTgLbXrtqn/KStEtrOrgruwVbaUfvUdKfNBCjNWq9kbq19Nn2SsJ0ApVGbvZxqn6QjVoBOe0AXfm2sI9S92CrrTXe1TxLTwDSmsg+Cq5LbsU12Nd3VPklBtP1ABSgr1mufpi2RoFhLObN7Ly6W/qz6PffmlmyLXbVP+UkqYm0mEriHctXck62wo/ap6U5KIm1n1+TyzSL3ZRvcXvts+gxhP/H3A22UW7Nxap90SKQmvABlRu2TLok1iPTb5qtNcHs2akvt07QlUhZrP9CWVEHdn03aWvtc0fQZQjnRJtIPHl9U/U4B3KKN2VH7lJ+kKtIg0ioT6fvnptqnpjspE6DU79baZ9MnCGGiBOijk1X3BGivqH3SVbazo15qn3SYAKVWap90mQClPmqfdFwjAXphQ+VeUPuk6yIF6Pjtcjv6k7tG4ftA7ZMeiBOgl3ak7xu1T/qgkR3p72vCd5vaJz0RbUf6+28fZoN/f3OaZYMGNxZx68ag9klfxNqR/sHV1dl0T6ZJmN5prAIqQOun9kmPRNyR/nwao3maNlcFdfvWTe2TPom4I/3l7MlIl00+IMn9Wyu1T3omYoB+OZ423iffNdeGdwvXSe2Tvon4SI95cja6u7J7uDZqn/RQlFH4s2kf6HWOCtDuUfukj2JNY8q7PWfD8JdNDsO7j2uh9klPxXomUh6ak+j84f2/HhpE6hq1T/oq0lLO6fLNfAZTLm/PN8S9XDm1T3os0mYiH0+n3Z+n0/x8UvVb7s/tXDW1T/os8nZ2H4fDx39W/Y4luJ8rdl3rVPukh2yoTLhC1VPtkz4SoARbrWuqfdI/ApQw2waP1D7pmXoDdDZp3nPhO2h98Ejtkz4SoJSn9glTNQfoo5N7f+T/XXVPgCZN7RNm9IFSjtonLAlQSlH7hGtRAvT10cuq3yWQW/xAq7VOtU96LtJ+oA0uf1/hHj9IoepZnDgvPemriDvSt4Hb/BCrcXkdpPKTvoq4I30buM+D3TR4dCU+6a+YGyq3gDs9lMEj2BRnFP7DcXb04qLqdwrgVg9yU+1TftJzUZrwz4e/FKsrViIlRu0Ttos0iLRKgCZlW5+n2idcRQpQSzkTVqh6qn3CKiuR2Gk1LtU+oUiAcrMbBo+kJ8wIUG60bfBI7ROuNRKgF39V/ab7ct+XsH3wyMR5WIoUoOO3w4WTu0bhU2DwCG4VJ0Avj4t3nwBNgMEjuF2UAP2ymp/ZfU34dlsbPFL7hO1irYXP7r99mA3+/c1plg1+q/ot9+f238fG4JHaJ2wVaTem7MHV1VmW/TYN0zuNVUAF6D62Dh5JT9gUaSlnvqHy+TRG8zRtrgoqAm61ZfBI7RO2i7ih8uVsU7vLJve2kwG32Tp4ZOoSbBUxQL8cTxvvk++aa8NLgZ0MHkEpEXeknydnow/4EAO7GDyCcqKMwp9N+0Cvc1SAtpLBIygp5iM9ZsPwl00Ow4uCGxk8gtKiBGi+o/IkNCfR+cP7fz00iNRGBo+gvEhLOafLN/MZTLlKHhL/7dPoffmKrDS4wWqzXfMd9hJpM5GPp9Puz9Npfj4JP/jnR9P+0/Gb2eLQo5dlT04cbLPefDd4BHuJvJ3dx+Hw8Z/Bhx4/m21EsqjKTvxcrhYqD7bZ1nyXnnC7mgM0PCy3mObmoitgMBwO82pouf5UkbDFRvNd7RP2U2+Afn9YupG9w+Xklv63v2Z/PshfGP+jbIeqTNiwrflu8Aj2UneAThLu56qqoWfz3Dy7rneelayCSoV1xQa7wSMop/4AnfjxSRUTP+d7kiz/zM2Xh+5/cmKhaEtwar7D/uoeRPr8aHY73v/94AMvljAVlzKVXdYkF4rWKp/FGAX2UP8o/PjD3WqqoYuwnC8JXXlt75MTDdcMHsGBokxj+vb6uIJq6HIn0bPrJnzZdaGyYcngERws1jzQeVP+oGro+fxxdF+OFyNH873uS5ycdJhbHS4yeAQh4k2kXzTl778PPXI+JHWUV2LPF9OYXpvGFEjzHSoQdSXSvCk/eBxYDZ0+Hfnei4uLf0yS9PHbZ/m3pSqgAnRG8x0qEXkp59XnZ9kBz4Vffz5y2fwUoFOa71CN2AF6NX5z94ANlRe7iMzZTCSE5jtUJG6Ajj9O92M6aEf6b2+Hj04m7v36wnZ2ATTfoTIxA/TjfCQ+tAu0AlJipQNE8x0OEi1Ap52fWSVLkg7Q+5jY6PfUfIdwcQL067PADZCr1vOcWG2+W7oJB4oQoN/mAz/VbcsUrt9Rsd58V/uEw9QdoPmg+9S94Pnzu+xeC59tUcdZJGKz+W7wCA5Sb4AuHyNX17iRAN2b5jtULsZ+oDWOG9mNaV+a71C92gP06GWtk5a+XZTqWO1tXmi+Qw1qDtD/0fy40YqeJobmO9Qi+lLOZvUzMjTfoR4CtPs036EmCQbo+OLTaDR6dxHSt9rD1NB8h9qkFqCLFaFT5fdm7l9saL5DfdIK0K+n2aqjV+UO0Lvc0HyHGiUVoNMd6bOT4cx0idPgt1JH6FlyaL5DrVIK0Hxa/qC4HcnH47J7i/YrOjTfoV41B+i4yiOfb8RlHqmeynkTzXeoWe1r4Q/afX7F8rnwBZ4LfyPNd6hd7Us5JwFadsH6DbYdxlr4m2i+Q/0EaDdpvkME9e/G9FtVATppwg9erb2mCb+V5jtEUfMg0tnkpv0xn2/040nBvbA4PdtIy7xb9KdSJ9eLCNF8hzhqDtDLbJvA+uiX40mCFvcW/TrJz41K6e6T60OGaL5DJHXPA/14t7oAzecxTRJz+GKUezubSV9qFlMvAnRe69R8h9rFmEhfUR/oxIfjtSgePCl5ct2PkULTXfMd6pVWgF6N3xQjtPyjlrqfIyudn5rvUKsYATp+Pvy1uud6jD+P3gyHw8ej9wHH7HySrISm5jvUK6W18BXoeJRsrXzKT6hLvAD9lo/8vGv4GUndzhLNd4grVoB+WIzGlx32qVan00TzHSKLFKCvC0M/P9f6nOPdOhwnmu8QXZwAzSdwDu6PRm+f5YPopdYOVau7eaL5DvFFCdB8CdG83jl+XXbxUKU6myia79CAKAF6Vqx1njVZBe1qpGQrq4803yGOKPNAV7ZRmlRHS22gVKmOZkqx9V4MUqBW8VciVbguqbxupor+T2iGAE2f/k9oiCZ86kxfgsYYREqc5js0J0qA5tsqLxYgfcg2n60ZT+eSRfMdGhRnIn3+ZI+jFxcXF29PTaSv0vWou+Y7xBcnQPNnFy011wPauQC9DkzNd2hApLXw4+Vi+EGTS+E7FqDFJrvmO8QXbzu7T8+Hw+Gv76p+u3I6FS9bKp/yE2KyoXKy1vo/rT6C6ARoqvR/QuMEaKL0f0LzBGia9H9CCwjQFK1WPq8036EZAjRBmu/QDgI0PZrv0BICNDmmL0FbCNDUmL4ErSFAE6P/E9pDgKZF/ye0iABNiv5PaJNYATrdSmThV4/0CFKocOr/hBaIE6BfjrMiD5ULstLlqf8TmhclQNfyU4AGKTbfr/R/QgtECdDzyX1+L3+ix9yfVb/n3hLOm3mTffGV5js0L9JjjZt8DlJRuolTrHBqvkM7xAjQ7w+Lz4VvVLKRs5qZ8hNaIVKANtfruSrVzCkOHV1dXS1b80CTIjXhBehBFuNHi/7P2TPgGz4pINYg0m9Vv02YNFNH/ye0U5QAbU8bPsnY0f8JLRVtIv3g8UXV7xQgxdxZW3Rk9Sa0RqRBJBPpgy37P4sT6Js+KSAnQFuu0GLX/QktEyVAH52suidA97USmvIT2sV2dq2m/xPaTIC2mf5PaDUB2mbXK470f0ILxQvQb6OJd81txDSVVv6Y/gntFitAP9ydB8DgSdVvWEZSAbQ+gT6ts4ceiBSgrwuTmH5u7IEeaQVocez9Sv8ntFCcAM13VB7cH43ePsv3pm9wb9CEImg5gKT/E9oq2iM95vXO8aQu2uDmoOlkkP5PaL8oAXpWrHWeNVkFTSaE9H9CAiLtB1qodE6qo3ca6wVNJYb0f0IK4u9I3+jedonEkP5PSIIAbSH9n5AGTfj22ej/TOO0oX8MIrXOPDqvu0GTOGvooygBejmJgsUCpA9Zkw9ISiCKlv2fBpCg7eJMpJ/UOrOjFxcXF29PTaS/hQ1EIBlxAnT8tLCUs7ke0BQC1AASpCPSWvjxcjH8oMml8O0PUBPoISHxtrP79Hw4HP76ruq3K6ftcWQCPaTEhsptYgI9JEWAtoj+T0iLAG0P/Z+QmHoDdLZs03Ph96L/E1IjQNtC/yckp+YAfXRy74/8v6vuCdBNhTXv8hPSoA+0JVZC0wYikAQB2g4GkCBBUbaz+zR6V1h+9OnNY9vZrTGABCmyoXIbGECCJAnQFjCBHtJUc4D+czjxy3E2+Ntw4dQ0pjX6PyFRNQdo/kT4TZVsCLrWs7rnybUwmvR/QqrqbsKfbcnPo0oqoEFdAS2MJv2fkKy6A3Q8Go3eTprwL0ZLF9W8T3cC1AR6SFT8QaRw3y6KPk+O+n7y55+lTq514WQCPaSrgXmgoTaW1M+UyubWpZMBJEhYlJVIr49eVnDgLgaoASRIWZQa6NNs8KqCI384zrLBcjrUYnLUr2Uqty2LJwNIkLSU+kCvvj7NsqPfDzlqy/LJABIkLVINtKqp8/+cVDv/PvuyAwG6PoDUrrMDbhOlD/S8ornzE19Ps+zOtBKafoCuDyCpf0Ji4mxn9+E4O3pRzfzP8T+ybPDkqgMBuhqd8hPSE6UJ/3z4S/jA+YYvk0ro/b+SD9DrAST9n5CoSINIB8w82jR+PamEvkw/QK9PxwR6SFKUAK38mUj5hKa/HScdoAaQIH2JPtIjn9AUUpNtTUwZQIIOSDRApxOaEg5QA0jQBckG6NXX5+UWIU21JKcMIEEnxAvQb/lWdu9K7Z1UvZYElQEk6IRYAfrh7rymNZ3D2ZiWJNUsNA0gQeIiBejrwiSmnyvY2i5UO6LKABJ0Q5wAPc+rnvdHo7fP8mckVbWs8+q25UjZFtW9d7BWnhRQXpQAzR8tN693TifBv6rszVIM0M0R+KbPCAgTJUDPigKSYhAAABm0SURBVLXOsyqroGWXI7UgrFZG4K9acUpAmPgbKk+qo3eq6wX9ltwzkQwgQWfE31C5su2VQzQfVwaQoDsEaOwTaF+nLBAo9SZ8SU3nlQEk6JIEB5HGF5/yNU0XISnccGAZQIJOiRKgl5PgWCxA+jD5+rfwo39+Vmj93n9f+uSaDlBLOKFD4kykn9Q682d6XFy8PT1oIn3+RKQVR69KnlyjibXSbDcCD8mLE6Djp4XQC+8BvczXMWUn8wfDT1fXD8rVZhuNrNWBIz2gkLxIa+HHy8Xwg/Cl8PmjQQYvCy98LL0naJORtTmAJD8hbfG2s/v0fFJr/PXdAUc+34jLPFIflDlEg5m1MoAkP6ELEtpQOe8HWG+wX5bsEWg0QA0gQcckFKDbZuAntBbeEk7onHgBOv48Go0uDjhw2gFqAAm6J1aAflxMQLr3e+iBVxc0zSTThLeEEzqogWlMpUZ9is420jI/bqlZpU3l1uYIfDPnAVQp3kT6wd/+c/RfvxySoPm+zHeKFdj86fDldmduKLhWRuCbOw2gWtGWclaxI/35dCLp8EX+fM/R29lM+nJp3FiAGkCCDkprM5EPx2sdiWWf8dlggF5lBpCgYyLtB1rVdnbjN8UIHTwue6BmossAEnRTehsqjz+P3gyHw8ej9wEx3Eh2yU/oqEgbKvd5R/riCHxDpwDUIkof6HlxDeZlpQ+GL6mB9DICD50VJUC/n2Y/LKYfrVZHY2skQI3AQ0dFmkj/bDFe/vU0fBZTBRoKUCPw0ElRBpEenZzkyfHj7I/Bycy9Biqi8ePLCBJ0V6RR+G2aaMlHzy/5CR0mQGt+PyPw0F0J7QdahcgJZgQeOk2A1v12RuChswRo7W9nBB66Kl6Afsu3UHr3Z9VvV07cCDOCBN0WK0A/3J1nSNn9k6oVNcPkJ3RcpAB9XYiR8AfDHy5miBmBh66LE6D5TsiD+6PR22f5bnTNLYWPmWJG4KHzogRo/iyOKnakP1zUADUCDx2X1o70B4scoEbgodMi7Qda1Y70h4oXY0aQoPvS25H+INFyTH5CDwjQmt7HCDx0nyZ8PW9jBB56wCBSXW9jBB46L0qAXk7CZLEA6UNWfEBSbBED1Ag8dF6cifSTWmd29OLi4uLtaS8m0heiU35Cd0V6JtLTwnh0cz2gsQLUCDz0Q6S18OPlYvhBk0vh4wToanLKT+iseNvZfXo+HA5/fVf125UTI81MYYK+sKFy9W+RXRUqn/ITuitKgL4+eln1uwSKEqBXRuChH+JPpG9UrAA1Ag99EH8pZ6OiBeiV/ITui1QD7U+ArgSn/IROi9IHet7o5Pmi2hPNFCbokTij8B+O84VIVb9TgLoTzRQm6JMoTfjnw19WVuZ0djs7U5igVyINImV9CdArU5igP6IE6KOTVfc6HaCmMEFfWIlU6dFtIgJ9IkCrPLgReOgVAVrhsY3AQ7/UH6Bfnx1n2Y+P/6z6fYLUmGqZ5yBB39QdoMuNQAd/r/qNQtQaoJ6DBD1Td4CeXXcMPqj6nQLUHKCmMEGv1BygXybN96OXFxcfT7NW7MhUd4CawgR9UnOAni0egZRPpm9BFbT2ALULE/RIvQGaP0xu/gzjdmwoUl+w2YUJ+qfeAJ3UOxcN90ljvsnHcc7VlmzmgEIP1R6gi3Xv7dhVua5kW2ZnZhMR6A8BWs1hl3OYrvdjArpOgFZ3WCPw0DMCtMLDyk/oFwFa9WHlJ/SGAK3kqKYwQR8J0CoOagoT9FL980BfjKbeHi+/HL1rbEJoHelmGzvoq9oDdJtOPRMp8yA56CsBWskh7cIEfVTzWvhPo2061YQ3BxR6yyM9Kjqk/IT+EaBVHlJ+Qq8I0IOPaA4o9JUAPfSA5oBCbwnQA49nGzvoLwF62OFsYwc9JkAPP5wpTNBTArSCw8lP6CcBWtXh5Cf0jgCt6nACFHpHgB50NHNAoc8E6CEHMwcUei1egH6bbiIy/rPq9yulyuKaAwp9FytAP9ydbWP3/eHR71W/YwkVFtccUOi9SAH6erEPaL5H/auq33J/lQbo7L/mMEFvxQnQ80nAHP3H8SRAx0+z7E5j24FWH6DmgEKPRQnQL8dZ9mRS+cx3os8T9Leq33Nv1Qdo1YcF0hElQM+y7KereYBeXU6/CTR+8+jkb/95XYMt+6xPAQpUJ0aATiqdeb/nPEAn1dHgNvw/j6fN5cHjxQGaC1BzQIEYATpPuXmAHvCA+PPliM0ighsLUHNAgaQCNO9KPXp5cfE6//OP4qH3P7mKimsOKJBWE/58UfP8erpI0IYC1BxQ4CreINKDZYCehw4iFcbvl5OhGgvQ2X/NYYJeixKgl/M59HnWTb4OnMZUDMs8QX+6ajhAzQGFnosSoHncDV7mATr+RxY8kX4lLCffzGq1TQZolYcE0hNnJVIed0uhSzlXw/LLcX4gAQo0J9Ja+LwOOhe8mcjaGqa8X+B3AQo0J9p2dl+f5fsxDe6/Dz/y2vDT5Nsf/k8jAWoSPZBLaUPlfB7o/cJ+omeLLZ72V0lxV0bf5Sf0V5R5oP+7ou2Xztfy8nUjAZotpn4uvwD6KdJKpKOXlWToh+PVvJx8Hz1AlyuQzGGCvosUoBP3Duj9XBp//HUlicevj+MH6PwP+Ql9F6UP9OPpbP7S/Saf5jFVXYBWdTggXbGmMb25u7YRXTMEKFCdiE/lfDPbzLOi7tAwAhSoTtRpTF+fzTL0fmMRKkCB6sSeB/r5WdmZRzvtXomUbXHwWwpQYC5ygI4/Pko8QIvHkZ/Qb1EDdJqelY4kRV8LX0xik5ig5+IF6LTxnneAVjEfdOnbxZ+3/9C1Q4u7CE6TQIFoAboYPjp6WfXblXNgcZdNd/kJRFoL/2b9acSNOThAKzsUkL5oSzlbsAzpSoACVYoUoPcqbLqPLz6NRqN3FyHVWQEKVCdKE/5ddU33xVBU4HiUAAWqk9KGyrMHwq84elXuAAIUqE5SAXo5HYw6Gc5MtycZlHtEsgAFqlNvgM7mua88kzMLX4mUH2dQ7Ez9WHY/5QOLaxUSUJRSgJ5v/M350+FLnNwhxbUKCVhRc4A+Orn3R/7fVfeCAnTtscZTl1l2p8wI1SHFtQoJWJVQH+i2de8R18JbhQSsEaAhf1V+AleR5oF+GhVngn56E7akc9KEH7xaey1iE16AAmsirUQqVBPLVhqvnW2kZd4t+lOpkxOgQGVSCtAvx5MELa6o/zrJz41K6e6TE6BAZWoO0H/mM95/Oc4GfxsunIbvSH8+nTo/fDHKvZ3NpC81i0mAAhWqOUC/HGdblGp1F31YP9zgScmTE6BAZepuwp9tyc+j8EciLbYWncdn6dGo8OJahQSsqztAx3lje9KEnzW7py4OO/748+jNcDh8PHofMJYfXFyrkIAN8QeRGhVaXKuQgE0NzANtUmBxrUICtkhoJVIVggP04EMA3dNIgAY9jaMSAhSoTqQAHb9dzgM9udtgj6gABaoTJ0AvV+dvClCgC6IE6Pp0+vua8EAHRAnQfAnm/bcPs8G/vzkt/RijSglQoDpRpjE9nS5ZP5tuKH9ecgO6ah02jemAIwAdFGkifb5n0vk0Rrc9mCOegybSr3wBEHEl0uVsF5HLAzYTOVhYcVc6cKs+JSBZEQP0y/G08T75rrk2fFBx5SewVaQ+0DxA58nZ6Mr4kOJqvgPbRRmFP5v2gV7naFIBagAJuEGsaUx5t+dsGL7sc+AqFRSgB/11oLuiBOik0pmH5iQ6f3j/r4eJDSIJUOAGkZZyTpdv5jOYphvJv6r6PfcmQIHqRNpM5OPptPvzNOQ5RlUSoEB1Im9n93E4fPxn1e9YggAFqmND5TJ/RYACBQL09r9iGhOwlQC99W8sVyCZSA+sqDdA8/lLWyQ0kX71xGs5JyBVAvSWn59XPeUnsKHmAH10ss29VAJU/yewgz7QfX9cggJrBOi+Py5AgTUCdN8fF6DAGgG6748LUGBNlA2Vnw9X/ZrKdnYCFNgh0iM9Ep3GJECBHQTo7h83jQm4UZQ+0G8XC2+fZYMnF83txxQ2kf5qJUoBZqIPIn05zlLaD9QyTuBG8Ufhz9PakV5+AjeJH6CTKmgqz0QSnsAu8QM0nccaa74DOzVSA00jQA0gAbs10QeaxnPhTWECbhE5QMcX/8gSeS68SfTALZqYSJ/GKLwABW7RQIAm8lx4AQrcIkqAFvelv5fKc+EFKHAL29nt86MCFNhCgO7zowIU2EKA3vyjpjEBOwnQHT9rIj2wS6QAHX98nt6O9JZyAjvFCdAPx0luqCw/gV2iBOhlqjvSA+wQJUDPJqF5/91yW/okdqRX+wRuE2sl0oOq3ybM3sXV/wncKlKANtdoX7VvcY3AA7eL8lz4p6kFqDmgwB4i9YE2uAHTir0DtPRfAfonSoBO2vDNbQG6QoAC1YkzD/TLcfZzY5PniwQoUJ1IK5G+nmbZj9db2rV9HqgABfYQrQaa1ER6AQrsIUqAruWnAAU6IdZKpMHji4RWIpnGBOwh1kqk36p+mzAm0gPVsRLpph+0lBO4hZVIN/6k/AR2i9IHep5cEx7gdlECdFIFvdOKefQCFKhQnHmgkwQ9el/1G4XYr7ia78A+ogwiPTo5mQZSIiuRDCABe4k1jSmhifSmMAH7EaCbP2ISPbAXz4Xf9SMSFNhBgO76EQEK7CBAd/2IAAV2EKC7fkSAAjtEWcr5fLjq14Nm1Y8vPo1Go3cXIQcRoEB1UhuF//yscJz7pSfnC1CgOmkFaP5kkBVHr0qenGlMQGWi9IF+W26l/PZZNngSvKHy5XRn+5N5R8Dd/JtBuV1KTKQHqhN9EOnLcfYk8Mh5TXbwsvDCx+OytVlLOYHqxB+FP88Gr8KOfL4Rl3mkPihzCJuJANWJH6CTKuhPQQceP93cVvQyK7dRnlAEqhM/QIMf8LHtL5Y9mAAFqtNIDVSAAl3QRB9o4Pb0kyb8Ru+pJjzQnMgBOr74R5YF9oHmj5dfS8u8W7TUwQQoUJ0mJtKHjsJPGv/Znd8LL3x9WvZgAhSoTgMBOgidB5q3/id/ffhilHs7m0lfahaTAAUqFOuZSEv3HoeuQ5r4cLy2lLNsGAtQoDqJbWc3flOM0MHjsqNRAhSoTmIBOjH+PHozHA4fj94HjOULUKA66QXoQQQoUJ04uzEtvnh9SAdoFQQoUJ0IAfrheLFYKB+O//mg3egPJUCB6tQeoOPCXM18Imd29PvGX4lHgALVqTtA8/y8nuz+9dlhD/TYsHstfLZFde8N9F3dAXo2yax/K7Ta80po4ErObcoHKEB1qkuzeWoVv8nzcnUPz8vwpZxblN+NCaA6lYXZIqOK35xv1jfPyi6/3Olb8AOWbtaZdn5XCtKVcihI67SwIMUzqmIT+fha+EsN05WCdKUcCtI6LSxI8Yy2tbCDN1SOpoW/1DBdKUhXyqEgrdPCgtwWoMGP9Iimhb/UMF0pSFfKoSCt08KC1B6g44tPo9Ho3UVt/QAt/KWG6UpBulIOBWmdFhZkrQ90Y8h90oQ/oA/087PC+Nf998HH2aWFv9QwXSlIV8qhIK3TwoKsnNGWIfctA/N7+3q6NoXg6FXooXZo4S81TFcK0pVyKEjrtLAgK2e0OeSeD8yHTmO6nG4GejKcmW5IP1gf5K9AC3+pYbpSkK6UQ0Fap4UFWTmjfPuQ1bg8D59Inx9s8LLwwsfjaheGzrXwlxqmKwXpSjkUpHVaWJDVM8ofY/Rg7fvQFvz5Rlxu5nMVWvhLDdOVgnSlHArSOi0syJbNRI5ezprx4w95szt0CCnarPwW/lLDdKUgXSmHgrROCwuyZTu7vK/y5ORk9jijo9A2d7RJpS38pYbpSkG6Ug4FaZ0WFmT9jMavi8Pmg38LrjAK0LK6UpCulENBWqeFBdk8o2+vF4/S/LH0YzQLtk0q1YTfpSsF6Uo5FKR1WliQrWc0/pyvHTrwyGdb50RVuLvoXAt/qWG6UpCulENBWqeFBanvjPLNRe8UHwjy9Wmlm4sutPCXGqYrBelKORSkdVpYkBrP6Hzaizp8Mcq9nc2kr34WUxt/qWG6UpCulENBWqeFBanzjD4cZ6sGT2p4lxb+UsN0pSBdKYeCtE4LC1LrGY3fFCN0cMiY1M1a+EsN05WCdKUcCtI6LSxI3Wc0/jx6MxwOH4/e17afHUAz2hfpAIkQoACBBChAIAEKEEiAAgQSoACBBChAIAEKEEiAAgQSoACBBChAIAEKEEiAAgQSoACBBChAIAEKEEiAAgQSoACBBChAIAEKEEiAAgQSoACBBChAIAEKEEiAAgQSoACBEg/Qr8+Os2xw//emzyPM+Gm29Nv8teRK9P3hD39cf7d5+skUqFiQVK/M+M3J5Ix/3P37T7Igbb0iaQfoh+PZb3Tw96bPJMj3hxsfiuRKNPlgFwJ08/STKdBKQRK9MotzzLKf119K64psFqStVyTpAL3c/EcpKYXznxcguRKNz7JC7myefjIFurEgCV2Z4ln/tPFSQldkd0FadUVSDtD8H6WjSf3982nxs5+Q8/VLn1yJpg2r5Zlunn4yBVotSJpXZnqO769mJzl4tXwpuSuypSCtvSIpB+jkd3rnr/yL/NP/oOmzCXC2fuVTK9HHaSNqWYjN00+lQGsFSfPKXC6ra/lJTr9M84psKUhrr0jCATr5xc3/dbr6cjz/ZSZlUoDVs06sRF8n//Zn90+Xn+zN00+kQOsFSfTKnF1X0m78/SdakPZekYQDdFKHX/zeCr/NhEwK8NP6CymVaFIHGDwpjL1snn4iBVovSPJXZnG+yV6RpcX5tvaKJByg1xX9lX+z0jEpwG9fH00qP/deLl9IqUTng5//Kg5eb55+IgVaL0jyV2YRL8lekaVFTrb2iqQdoMuuj40u5hScZ4Nf5sOI96f/mCZWom/ztlUhQNdOP5ECrRck+SuziJdkr8jS5bIzt6VXJOEALf7aLlvbIb7DWWFmxvSf2RRLVMidzdNPqUDFAE39ykzqbdNGbdpX5Oq6IO29IgK0Mfno4eDxX/mCimx2+imWqIsBmvqVyee0LgbhE74ihYK094oI0MYs/3WdFiW/eVMsURcDNPErc70mIO0rUihIe6+IAG2D/B/Y39IsURcDdPXV1K7MtLb2avpl8ldky/B6y66IAG2F8+Q+3QsdD9D0rszX69U7aV+RYkGK2nVFEg7QtozDVWFWlhRL1IVR+KkbAjS1K5PvsHFUmI6V7BVZKUhRu65I2gHaiplgVVh+KJIrURfmgU7dFqBpFGSSJdnPy2U5CV+R1YIUteuKJBygbVmLUIXZv6EplqgLK5Gmbm7CJ3RlXmcrrdl0r8haQYradUUSDtC2rIYNdX79EZkPMqZYotXZPymuvJ5b7cxN88qcr/UaJntF1gvS3iuScIC2ZT+WUJPrPr9ji/P2UivR6gKeFPf+mSsUJNUrM2nW/rC6PXuiV2SjIO29IikH6GLbwDZvbbjDdJbGk782tm9Mq0Rre3CsnX5CBVqfSJ/elSlMliy8lOAV2SxIe69IygHakj2pg305vj7/+T+h6ZVopeswzf3PZ4oFSfPKnGdFs5hJ8opsKUhrr0jSAXr1zzY8FSXcl9Ns/fyTK9Hq2Mvm6SdToJWCpHhlio9dWwZoildka0HaekXSDtBWPJfvAOOP+Q5dPz7+8/ql1Eq0Nnid5jMgc6sFSfDKFB+7dh2gCV6R7QVp6RVJPEABmiNAAQIJUIBAAhQgkAAFCCRAAQIJUIBAAhQgkAAFCCRAAQIJUIBAAhQgkAAFCCRAAQIJUIBAAhQgkAAFCCRAAQIJUIBAAhQgkAAFCCRAAQIJUIBAAhQgkAAFCCRAAQIJUIBAAhQgkAAFCCRAAQIJUIBAAhQgkAAFCCRAAQIJUIBAAhQgkAAFCCRAAQIJUIBAAhQgkAAFCCRAAQIJUIBAAhQgkAAFCCRAAQIJUIBAAhQgkAAFCCRAAQIJUIBAAhQgkAAFCCRAAQIJUBJzni0NTh7/Wfh/xh8fHU9eXX0RaiRASUwhQPMM/fvi9fGb4+WrP//V5BnSHwKUxKwGaJb9Nnt5/LT44h0JSgwClMScLzPzavxhUun84Y/pl3l+Hr3MG++fH02+/Km5E6RHBCiJKQTo1dWX4/l3Z5PQfLB49UNW/BmojQAlMSsBmgdnXtnMg/TBys9oxBOBACUxqwF6PgvQtcT8/jD74ffoZ0b/CFASsy1A8x7QlTb7hfonMQhQErPRhH8wbcHPxpIgKgFKYrYNIl3q86QRApTEFAL04vXxLDkFKM0QoCRmbSL94NXVNEBN/KQBApTEnG/mpxooDRGgJKYQoD/eezmLzS/HApQmCFASc75lldH3h/Oq6MLYhkzEIEBJzLYA3ZgHOmnT/xzvlOgtAUpitgXoxtrNs5WVnVATAUpitgbo2lr4y8zEemIQoCRma4BOh5aud2M6VgElCgFKYrYH6HQ/0B/zh3mMPz6yozKRCFASsz1Ar76fFqeHHmnAE4MAJTE3BOjV+PV1fnomEnEIUBJzU4BeXX1746mcxCVAAQIJUIBAAhQgkAAFCCRAAQIJUIBAAhQgkAAFCCRAAQIJUIBAAhQgkAAFCCRAAQIJUIBAAhQgkAAFCCRAAQIJUIBAAhQgkAAFCCRAAQIJUIBAAhQgkAAFCCRAAQIJUIBAAhQgkAAFCCRAAQIJUIBAAhQgkAAFCCRAAQIJUIBAAhQgkAAFCCRAAQIJUIBAAhQgkAAFCCRAAQIJUIBAAhQgkAAFCCRAAQIJUIBAAhQgkAAFCCRAAQL9f3uiSNt8ihkgAAAAAElFTkSuQmCC" width="672" /></p>
+<ul>
+<li>i will take 100 PCS which explaines ~ 75% of the variance in the
+data.</li>
+</ul>
+<pre class="r"><code>X_pca_train_100 = as_tibble(pca$x[,1:100])
+X_pca_test_100 = as_tibble(predict(pca,X_test)[,1:100])</code></pre>
+<pre class="r"><code>lda_full = lda(y~., df_train)
+df_pca_train_100 = X_pca_train_100 %&gt;% mutate(y=y_train)
+lda_pca = lda(y~., df_pca_train_100)</code></pre>
+<pre class="r"><code>get_results = function(model, X, y_true, lda=TRUE, neural_model=FALSE){
+  # this function returns the confusion matrix and miss classification error of a given model
+  y_pred = predict(model, X)
+  if (lda) {
+     y_pred = y_pred$class 
+  }
+  if (neural_model){
+    y_pred = apply(y_pred,1,which.max)
+    y_pred[y_pred==1] = 5
+  }
+  classification_err = mean(y_pred != y_true)
+  conf_matrix = confusionMatrix(as.factor(y_true), as.factor(y_pred))
+  return( list(&quot;classification_err&quot; = classification_err,
+               &quot;conf_matrix&quot; =   conf_matrix$table))
+}
+lda_train_results = get_results(lda_full, X_train, y_train, TRUE)
+lda_test_results = get_results(lda_full, X_test, y_test, TRUE)
+lda_pca_train_results = get_results(lda_pca, X_pca_train_100, y_train, TRUE)
+lda_pca_test_results = get_results(lda_pca, X_pca_test_100, y_test, TRUE)
+tibble(model_dataset = c(&quot;lda train&quot;, &quot;lda test&quot;, &quot;lda with pca train&quot;, &quot;lda with pca test&quot;),
+       err = c(lda_train_results$classification_err, lda_test_results$classification_err, lda_pca_train_results$classification_err,  lda_pca_test_results$classification_err))</code></pre>
+<pre><code>## # A tibble: 4 × 2
+##   model_dataset         err
+##   &lt;chr&gt;               &lt;dbl&gt;
+## 1 lda train          0.0231
+## 2 lda test           0.0954
+## 3 lda with pca train 0.0375
+## 4 lda with pca test  0.0954</code></pre>
+<ul>
+<li><p>we can see that both the model with the PCA and the model without
+the PCA preform rather similar on the test set (9.5% error) but the
+model on the full data tends to overfits more then the PCA. meaning the
+PCA here helps reduce the overfit.</p></li>
+<li><p>lets take a look at the confution matrix of the full LDA</p></li>
+<li><p>train:</p></li>
+</ul>
+<pre><code>##           Reference
+## Prediction   2   3   5
+##          2 719  10   2
+##          3   7 644   7
+##          5   3  16 537</code></pre>
+<p>we can see that the model struggels more to distinguish between 5 and
+3, after that it has a hard time with 3 and 2, and can seperate well
+enougth 5 and 2</p>
+<ul>
+<li>test:</li>
+</ul>
+<pre><code>##           Reference
+## Prediction   2   3   5
+##          2 184  10   4
+##          3   6 148  12
+##          5   0  18 142</code></pre>
+<ul>
+<li>we can see in general the same behavior as in the train set, but
+with larger percentage of mistake, notice that the test set is smaller
+then the train set and that we have higher values outside the diagonal
+(which indicate false prediction)</li>
+</ul>
+</div>
+<div id="b" class="section level3">
+<h3>1.b</h3>
+<pre class="r"><code>multinom_full = multinom(y~., df_train)</code></pre>
+<pre><code>## # weights:  774 (514 variable)
+## initial  value 2136.800901 
+## iter  10 value 400.032251
+## iter  20 value 139.626891
+## iter  30 value 56.619769
+## iter  40 value 24.791592
+## iter  50 value 15.917622
+## iter  60 value 8.683908
+## iter  70 value 3.882552
+## iter  80 value 0.925665
+## iter  90 value 0.245970
+## iter 100 value 0.066039
+## final  value 0.066039 
+## stopped after 100 iterations</code></pre>
+<pre class="r"><code>multinom_pca = multinom(y~., df_pca_train_100)</code></pre>
+<pre><code>## # weights:  306 (202 variable)
+## initial  value 2136.800901 
+## iter  10 value 192.871780
+## iter  20 value 97.706870
+## iter  30 value 54.966766
+## iter  40 value 43.944227
+## iter  50 value 41.985445
+## iter  60 value 40.308383
+## iter  70 value 37.790193
+## iter  80 value 27.292217
+## iter  90 value 0.983953
+## iter 100 value 0.013846
+## final  value 0.013846 
+## stopped after 100 iterations</code></pre>
+<pre class="r"><code>multinom_train_results = get_results(multinom_full, X_train, y_train, FALSE)
+multinom_test_results = get_results(multinom_full, X_test, y_test, FALSE)
+multinom_pca_train_results = get_results(multinom_pca, X_pca_train_100, y_train, FALSE)
+multinom_pca_test_results = get_results(multinom_pca, X_pca_test_100, y_test, FALSE)
+tibble(model_dataset = c(&quot;multinom train&quot;, &quot;multinom test&quot;, &quot;multinom with pca train&quot;, &quot;multinom with pca test&quot;),
+       err = c(multinom_train_results$classification_err, multinom_test_results$classification_err, multinom_pca_train_results$classification_err,  multinom_pca_test_results$classification_err))</code></pre>
+<pre><code>## # A tibble: 4 × 2
+##   model_dataset              err
+##   &lt;chr&gt;                    &lt;dbl&gt;
+## 1 multinom train          0     
+## 2 multinom test           0.145 
+## 3 multinom with pca train 0     
+## 4 multinom with pca test  0.0935</code></pre>
+<ul>
+<li><p>clearly we overfit the data, we can see a train error of 0, which
+means that in the train set we are able to classify each observation to
+the correct y value, but for the test set we have much larger errors
+14.5% for the full multi-class logistic regression, and 9.35% for the
+multi-class logistic regression with PCA.</p></li>
+<li><p>we see that in this case the PCA helps improve the results of the
+model, also the multi-class logistic regression with PCA has similar
+results to the LDA</p></li>
+<li><p>lets take a look at the confution matrix of the PCA multi-class
+logistic regression</p></li>
+<li><p>the train has perfect score thus the confution matrix is diagonal
+and not that interesting, lets see the test confution matrix:</p></li>
+</ul>
+<pre><code>##           Reference
+## Prediction   2   3   5
+##          2 184  10   4
+##          3   6 146  14
+##          5   4  11 145</code></pre>
+<ul>
+<li>we can see a rather similar performance, the model struggles the
+most with 5 and 3, after that with 3 and 2, and is rather ok with 5 and
+2.</li>
+</ul>
+</div>
+<div id="c" class="section level3">
+<h3>1.c</h3>
+<ul>
+<li><p>we are using images, and as we know the SOTA for image predictive
+modeling are CNNS so lets make a CNN to predict the class</p></li>
+<li><p>first lets prepare the data:</p></li>
+<li><p>the loss expects values to be between 0-2, so i will reencode 5
+=&gt; 0, 2=&gt; 1, 3 =&gt; 2</p></li>
+</ul>
+<pre class="r"><code>X_train_net = array_reshape(as.matrix(X_train), c(nrow(X_train),16,16,1))
+y_train_net = y_train
+y_train_net[y_train_net == 5] = 1
+
+X_test_net = array_reshape(as.matrix(X_test), c(nrow(X_test),16,16,1))
+y_test_net = y_test
+y_test_net[y_test_net == 5] = 1</code></pre>
+<ul>
+<li>now create and train the model</li>
+</ul>
+<pre class="r"><code>cnn_model &lt;- keras_model_sequential() %&gt;%
+  layer_conv_2d(filters = 16, kernel_size = c(3, 3), activation = &quot;relu&quot;, input_shape = c(16, 16, 1)) %&gt;%
+  layer_conv_2d(filters = 32, kernel_size = c(3, 3), activation = &quot;relu&quot;) %&gt;%
+  layer_max_pooling_2d(pool_size = c(2, 2)) %&gt;%
+  layer_flatten() %&gt;%
+  layer_batch_normalization() %&gt;%
+  layer_dense(units = 64, activation = &quot;relu&quot;) %&gt;%
+  layer_dropout(rate = 0.4) %&gt;%
+  layer_dense(units = 32, activation = &quot;relu&quot;) %&gt;%
+  layer_dropout(rate = 0.3) %&gt;%
+  layer_dense(units = 3, activation = &quot;softmax&quot;)
+
+
+summary(cnn_model)</code></pre>
+<pre><code>## Model: &quot;sequential&quot;
+## _____________________________________________________________________
+## Layer (type)                   Output Shape               Param #    
+## =====================================================================
+## conv2d_1 (Conv2D)              (None, 14, 14, 16)         160        
+## _____________________________________________________________________
+## conv2d (Conv2D)                (None, 12, 12, 32)         4640       
+## _____________________________________________________________________
+## max_pooling2d (MaxPooling2D)   (None, 6, 6, 32)           0          
+## _____________________________________________________________________
+## flatten (Flatten)              (None, 1152)               0          
+## _____________________________________________________________________
+## batch_normalization (BatchNorm (None, 1152)               4608       
+## _____________________________________________________________________
+## dense_2 (Dense)                (None, 64)                 73792      
+## _____________________________________________________________________
+## dropout_1 (Dropout)            (None, 64)                 0          
+## _____________________________________________________________________
+## dense_1 (Dense)                (None, 32)                 2080       
+## _____________________________________________________________________
+## dropout (Dropout)              (None, 32)                 0          
+## _____________________________________________________________________
+## dense (Dense)                  (None, 3)                  99         
+## =====================================================================
+## Total params: 85,379
+## Trainable params: 83,075
+## Non-trainable params: 2,304
+## _____________________________________________________________________</code></pre>
+<pre class="r"><code>cnn_model %&gt;% compile(loss = &#39;sparse_categorical_crossentropy&#39;,optimizer = optimizer_adam(learning_rate = 0.0001),metrics = c(&#39;accuracy&#39;))
+cnn_model %&gt;% fit(X_train_net, y_train_net-1, batch_size = 64,epochs = 100,verbose = 1,
+                  class_weight = list(&quot;0&quot; = 1.5, &quot;1&quot; = 0.7, &quot;2&quot; = 1))</code></pre>
+<pre class="r"><code>cnn_train_res = get_results(cnn_model, X_train_net, y_train, FALSE, TRUE)
+cnn_test_res = get_results(cnn_model, X_test_net, y_test, FALSE, TRUE)
+tibble(model_dataset = c(&quot;neural net train&quot;, &quot;neural net test&quot;),
+       err = c(cnn_train_res$classification_err, cnn_test_res$classification_err))</code></pre>
+<pre><code>## # A tibble: 2 × 2
+##   model_dataset       err
+##   &lt;chr&gt;             &lt;dbl&gt;
+## 1 neural net train 0     
+## 2 neural net test  0.0305</code></pre>
+<ul>
+<li><p>we can see that this model is far better then the ones before,
+also it still has a much lower error in the train set, we can keep
+playing with the paramaters of the model (add some more regularization
+or use data augmentation -[which for some reason doesnt work for me in
+r]) to get even better results</p></li>
+<li><p>lets take a look at the test confution matrix</p></li>
+</ul>
+<pre><code>##           Reference
+## Prediction   2   3   5
+##          2 194   1   3
+##          3   3 156   7
+##          5   0   2 158</code></pre>
+<ul>
+<li><p>we can see that the results are much better, we still some
+dificulties with the 5’s which is most chakkenging to classify.</p></li>
+<li><p>the over all results:</p></li>
+</ul>
+<pre><code>## # A tibble: 10 × 2
+##    model_dataset              err
+##    &lt;chr&gt;                    &lt;dbl&gt;
+##  1 multinom train          0     
+##  2 multinom with pca train 0     
+##  3 neural net train        0     
+##  4 lda train               0.0231
+##  5 neural net test         0.0305
+##  6 lda with pca train      0.0375
+##  7 multinom with pca test  0.0935
+##  8 lda test                0.0954
+##  9 lda with pca test       0.0954
+## 10 multinom test           0.145</code></pre>
+<ul>
+<li>we can see from the full results that the multinom and neural net
+both have perfect score on the train set, also the neural net has the
+best results on the test set, and even better results on the rest set
+then other models get on the train set!</li>
+</ul>
+</div>
+</div>
 
 
 
