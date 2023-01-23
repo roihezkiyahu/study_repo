@@ -216,8 +216,22 @@ we can see that the results are much better, we still some dificulties with the 
 the over all results:
 
 ```{r echo=FALSE}
-tibble(model_dataset = c("lda train", "lda test", "lda with pca train", "lda with pca test", "multinom train", "multinom test", "multinom with pca train", "multinom with pca test", "neural net train", "neural net test"),
-       err = c(lda_train_results$classification_err, lda_test_results$classification_err, lda_pca_train_results$classification_err,  lda_pca_test_results$classification_err, multinom_train_results$classification_err, multinom_test_results$classification_err, multinom_pca_train_results$classification_err,  multinom_pca_test_results$classification_err, cnn_train_res$classification_err, cnn_test_res$classification_err)) %>% arrange(err)
+tbl = tibble(model_dataset = c("lda", "lda with pca", "multinom", "multinom with pca", "neural net"),
+       err_train = c(lda_train_results$classification_er , lda_pca_train_results$classification_err, multinom_train_results$classification_err,  multinom_pca_train_results$classification_err, cnn_train_res$classification_err),
+       err_test = c(lda_test_results$classification_err, lda_pca_test_results$classification_err, multinom_test_results$classification_err,  multinom_pca_test_results$classification_err,cnn_test_res$classification_err) ) %>% arrange(err_test)
+tbl
+```
+
+```{r echo=FALSE}
+tbl = tibble(model = c("lda", "lda with pca", "multinom", "multinom with pca", "CNN","lda", "lda with pca", "multinom", "multinom with pca", "CNN"),
+       missclasificarion_error = c(lda_train_results$classification_er , lda_pca_train_results$classification_err, multinom_train_results$classification_err,  multinom_pca_train_results$classification_err, cnn_train_res$classification_err, lda_test_results$classification_err, lda_pca_test_results$classification_err, multinom_test_results$classification_err,  multinom_pca_test_results$classification_err,cnn_test_res$classification_err) ,
+       dataset = c("train", "train", "train", "train", "train", "test", "test", "test", "test", "test")) %>% arrange(missclasificarion_error)
+ggplot(tbl, aes(x = model, y = missclasificarion_error, group = dataset, fill = dataset)) +
+  geom_col(stat = "identity", position = "dodge")+
+  geom_text(aes(label=str_c(round(missclasificarion_error,4)*100, "%")), position = position_dodge(0.90), size = 3, 
+            vjust=-0.8, hjust=0.5, colour = "gray25")
+
+
 ```
 
 we can see from the full results that the multinom and neural net both have perfect score on the train set, also the neural net has the best results on the test set, and even better results on the rest set then other models get on the train set!
@@ -273,4 +287,107 @@ LR assumption: the model that we have for the linear regression is $y = X\beta +
 Ridge assumption: Ridge assumes a normal prior for $\beta$ meaning: $\beta \sim N(0, \tau^2I)$
 
 
+# Q3
 
+### 3.a
+
+the ridge regression model yields $\hat y = X \hat \beta_{ridge} = X (X^TX + \lambda I)^{-1}X^T Y$
+
+setting $S(X,\lambda) = X (X^X + \lambda I)^-1X^T$ we get that ridge regression follows the first condition
+
+### 3.b
+
+$$
+\text{for clearer writing i will use the notation k instead of } i_0
+\\
+\text{denote } \hat \beta = argmin_\beta \sum_{i}(\tilde y^{(-k)}_i - ((X^{(-k)})^t\beta)_i)^2 + \lambda \sum_j \beta_j^2 = argmin_\beta L_k
+\\
+\hat{\tilde \beta} = argmin_\beta \sum_{i}(\tilde y_i - X_i^t\beta)^2 + \lambda \sum_j \beta_j^2
+\\
+\text{lets break doen the above expression}
+\\
+\sum_{i}(\tilde y_i - X_i^t\beta)^2 + \lambda \sum_j \beta_j^2 = \sum_{i\ne k}( y_i - X_i^t\beta)^2 +(\hat y_k^{(-k)} - X_k^t\beta)^2 + \lambda \sum_j \beta_j^2 = \sum_{i\ne k}( y_i - X_i^t\beta)^2 +(X_k^T \hat \beta - X_k^t\beta)^2 + \lambda \sum_j \beta_j^2=
+\\
+= \sum_{i\ne k}( y_i - X_i^t\beta)^2 +(X_k^T (\hat \beta - \beta))^2 + \lambda \sum_j \beta_j^2 = L_k + (X_k^T (\hat \beta - \beta))^2
+\\
+\text{thus } \hat{\tilde \beta} = argmin_\beta L_k + (X_k^T (\hat \beta - \beta))^2
+\\
+\text{the argmin of } L_k \text{ is } \hat \beta \text{ and if we plug it in the formulaa above we get } L_k(\hat \beta) \text{ which achives the minimum of the equation above}
+\\
+\text{thus we can conclude that } \hat{\tilde \beta} = \hat \beta
+\\
+\hat {\tilde y_k} = S (\tilde y )_k = X_k \tilde \beta = X_k \hat \beta = \hat y_k^{(-k)}
+$$
+
+### 3.c
+
+$$
+\\
+\text{we saw in calss that for a linear model (like ridge regression as we proved above) the optimism is: } \frac{2 \sigma^2tr(S)}{n}
+\\
+\text{thus the smaller the diagonal elements are the smaller tr(S) becomes and the optimisim is smaller}
+\\
+S(X, \lambda)_{ii} = (X(X^TX + \lambda I)^{-1} X^T)_{ii}
+\\
+\text{using the SVD decomposition we can derive:}
+\\
+\\
+X = UDV^t
+\\
+X^tX = VD^2V^t
+\\
+(X^tX)^{-1} = VD^{-2}V^t
+\\
+(X^tX+\lambda I_p)^{-1} = V(D^2+\lambda I_p)^{-1}V^t
+\\
+X(X^tX+\lambda I_p)^{-1}X^t = UD(D^2+\lambda I_p)^{-1}DU^t = D^2 (D^2+\lambda I_p)^{-1}
+\\
+S(X, \lambda)_{ii} = D_{ii}^2 (D_{ii}^2+\lambda I_p)^{-1}
+\\
+\text{thus } S(X, \lambda)_{ii} \text{ is a decreaceing funtion of } \lambda
+$$
+
+
+### 3.d
+
+$$
+\text{i will show it formally, by differentiating the expression}
+\\
+\frac{\partial D_{ii}^2 (D_{ii}^2+\lambda I_p)^{-1}}{\lambda}  = - D_{ii}^2 (D_{ii}^2+\lambda I_p)^{-2} <0 \quad \forall \lambda
+\\
+\text{thus we can conclude that } S(X, \lambda)_{ii} \text{ is indeed a decreaceing funtion of } \lambda
+$$
+
+
+### 3.e 
+
+$$
+\text{we would not expect the lemma to hold for the lasso penelty}
+\\
+\text{the solution for the lasso problem does not hold for the first condition}
+\\
+\text{this is because we cannot derive a closed form for lasso regression, and thus cannot conclude it is a linear model}
+$$
+
+
+### 3.f
+
+$$
+\text{the lemma does not hold for the K-NN regression, the K-NN is a linear model but the second condition does not hold.}
+\\
+N_K (x_m) := \text{the K neighbours of } x_m
+\\
+N'_K (x_m) := \text{the K-1 neighbours of } x_m (\text{that is } N_K (x_m) \text{whitout } x_m)
+\\
+\hat {\tilde y_m} = \sum_{x_j \in N_K (x_m)} \frac{1}{K} \tilde y_j = \frac{1}{K} [(\sum_{x_j \in N'_K (x_m)}    y_j) + \hat y_m^{(-m)}]
+\\
+\hat y_m^{(-m)} = \sum_{x_j \in N'_{K+1}(x_m)} \frac{1}{K}y_j = \frac{\hat y_m^{(-m)} - \hat y_m^{(-m)}}{K} + \frac{1}{K} \sum_{x_j \in N'_{K+1}(x_m)} y_j = \frac{\hat y_m^{(-m)} - \hat y_m^{(-m)}}{K} + \frac{y_l}{K}+ \frac{1}{K} \sum_{x_j \in N'_{K}(x_m)} y_j = 
+\\
+= [(\sum_{x_j \in N'_K (x_m)}    y_j) + \hat y_m^{(-m)}] + \frac{y_l - \hat y_m^{(-m)}}{K} = \hat {\tilde y_m} + \frac{y_l - \hat y_m^{(-m)}}{K}
+\\
+y_l \text{is the K+1 neighbour}
+\\
+\text{ thus we get that for all m: } \hat y_m^{(-m)} = \hat {\tilde y_m} \iff y_l = \hat y_m^{(-m)}  \iff y \text{ is a vector of the same values}
+\\
+\text{thus we can conclude that }
+$$
