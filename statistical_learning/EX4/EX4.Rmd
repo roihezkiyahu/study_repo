@@ -14,7 +14,6 @@ library(class)
 library(tidymodels)
 library(furrr)
 library(rpart)
-library(rpart)
 library(keras)
 ```
 

@@ -17,6 +17,10 @@ library(MASS)
 library(tidyverse)
 library(nnet)
 library(keras)
+library(glmnet)
+library(reticulate)
+library(ncvreg)
+library(e1071)
 ```
 
 
@@ -38,16 +42,16 @@ y_test = df_test[,1]
 
 ### 1.a
 
-* using PCA
+using PCA
 
 ```{r}
 pca <- prcomp(X_train)
-plot(cumsum(pca$sdev/sum(pca$sdev)),
+plot(cumsum(pca$sdev^2/sum(pca$sdev^2)),
      xlab = "PC",
      ylab = "Cumulative Proportion of Variance Explained")
 ```
 
-i will take 100 PCS which explaines ~ 75% of the variance in the data.
+i will take 100 PCS which explain ~ 95% of the variance in the data:
 
 
 ```{r}
@@ -55,6 +59,7 @@ X_pca_train_100 = as_tibble(pca$x[,1:100])
 X_pca_test_100 = as_tibble(predict(pca,X_test)[,1:100])
 ```
 
+building the models:
 
 ```{r}
 lda_full = lda(y~., df_train)
@@ -62,6 +67,7 @@ df_pca_train_100 = X_pca_train_100 %>% mutate(y=y_train)
 lda_pca = lda(y~., df_pca_train_100)
 ```
 
+getting results:
 
 ```{r}
 get_results = function(model, X, y_true, lda=TRUE, neural_model=FALSE){
@@ -91,9 +97,9 @@ tibble(model_dataset = c("lda train", "lda test", "lda with pca train", "lda wit
 ```
 
 
-we can see that both the model with the PCA and the model without the PCA preform rather similar on the test set (9.5% error) but the model on the full data tends to overfits more then the PCA. meaning the PCA here helps reduce the overfit.
+we can see that both the model with the PCA and the model without the PCA preform rather similar on the test set (9.5% error) but the model on the full data gets a better result on the train set.
 
-lets take a look at the confution matrix of the full LDA
+lets take a look at the confusion matrix of the full LDA
 
 train:
 
@@ -101,23 +107,28 @@ train:
 lda_train_results$conf_matrix
 ```
 
-we can see that the model struggels more to distinguish between 5 and 3, after that it has a hard time with 3 and 2, and can seperate well enougth 5 and 2
+we can see that the model struggles more to distinguish between 5 and 3, after that it has a hard time with 3 and 2, and can separate well enough 5 and 2
 
 test:
 
 ```{r echo=FALSE}
 lda_test_results$conf_matrix
 ```
+
 we can see in general the same behavior as in the train set, but with larger percentage of mistake, notice that the test set is smaller then the train set and that we have higher values outside the diagonal (which indicate false prediction)
 
 
 ### 1.b
+
+building the models:
+
 
 ```{r message=FALSE}
 multinom_full = multinom(y~., df_train)
 multinom_pca = multinom(y~., df_pca_train_100)
 ```
 
+getting results:
 
 ```{r}
 multinom_train_results = get_results(multinom_full, X_train, y_train, FALSE)
@@ -133,12 +144,12 @@ tibble(model_dataset = c("multinom train", "multinom test", "multinom with pca t
 
 
 
-clearly we overfit the data, we can see a train error of 0, which means that in the train set we are able to classify each observation to the correct y value, but for the test set we have much larger errors 14.5% for the full multi-class logistic regression, and 9.35% for the multi-class logistic regression with PCA.
-we see that in this case the PCA helps improve the results of the model, also the multi-class logistic regression with PCA has similar results to the LDA
+clearly we overfit the training data, we can see a train error of 0, which means that in the train set we are able to classify each observation to the correct y value, but for the test set we have much larger errors 14.5% for the full multi-class logistic regression, and 9.35% for the multi-class logistic regression with PCA.
+we see that in this case that the PCA helps improve the results of the model, also the multi-class logistic regression with PCA has similar results to the LDA
 
 
-lets take a look at the confution matrix of the PCA multi-class logistic regression
-the train has perfect score thus the confution matrix is diagonal and not that interesting, lets see the test confution matrix:
+lets take a look at the confusion matrix of the PCA multi-class logistic regression
+the train has perfect score thus the confusion matrix is diagonal and not that interesting, lets see the test confusion matrix:
 
 
 ```{r echo=FALSE}
@@ -153,7 +164,7 @@ we can see a rather similar performance, the model struggles the most with 5 and
 we are using images, and as we know the SOTA for image predictive modeling are CNNS so lets make a CNN to predict the class 
 
 first lets prepare the data:
-- the loss expects values to be between 0-2, so i will reencode 5 => 0, 2=> 1, 3 => 2
+- the loss expects values to be between 0-2, so i will re encode 5 => 0, 2=> 1, 3 => 2
 
 ```{r}
 X_train_net = array_reshape(as.matrix(X_train), c(nrow(X_train),16,16,1))
@@ -166,7 +177,7 @@ y_test_net[y_test_net == 4] = 0
 ```
 
 
-now create and train the model
+now create the model
 
 ```{r message=FALSE}
 cnn_model <- keras_model_sequential() %>%
@@ -175,24 +186,24 @@ cnn_model <- keras_model_sequential() %>%
   layer_max_pooling_2d(pool_size = c(2, 2)) %>%
   layer_flatten() %>%
   layer_batch_normalization() %>%
-  layer_dense(units = 64, activation = "relu") %>%
-  layer_dropout(rate = 0.4) %>%
   layer_dense(units = 32, activation = "relu") %>%
-  layer_dropout(rate = 0.3) %>%
+  layer_dropout(rate = 0.2) %>%
+  layer_dense(units = 16, activation = "relu") %>%
+  layer_dropout(rate = 0.1) %>%
   layer_dense(units = 3, activation = "softmax")
 
 
 summary(cnn_model)
 ```
-
+compile and train the model
 
 ```{r}
 cnn_model %>% compile(loss = 'sparse_categorical_crossentropy',optimizer = optimizer_adam(learning_rate = 0.0001),metrics = c('accuracy'))
-cnn_model %>% fit(X_train_net, y_train_net, batch_size = 64,epochs = 100,verbose = 1,
+cnn_model %>% fit(X_train_net, y_train_net, batch_size = 64,epochs = 150,verbose = 1,
                   class_weight = list("0" = 1.5, "1" = 0.7, "2" = 1))
 ```
 
-
+getting the results:
 
 ```{r}
 cnn_train_res = get_results(cnn_model, X_train_net, y_train, FALSE, TRUE)
@@ -204,14 +215,14 @@ tibble(model_dataset = c("neural net train", "neural net test"),
 we can see that this model is far better then the ones before, also it still has a much lower error in the train set, we can keep playing with the paramaters of the model (add some more regularization or use data augmentation -[which for some reason doesnt work for me in r]) to get even better results
 
 
-lets take a look at the test confution matrix
+lets take a look at the test confusion matrix
 
 
 ```{r echo=FALSE}
 cnn_test_res$conf_matrix
 ```
 
-we can see that the results are much better, we still some dificulties with the 5's which is most chakkenging to classify.
+we can see that the results are much better, we still some difficulties with the 5's which is most challenging to classify.
 
 the over all results:
 
@@ -234,7 +245,7 @@ ggplot(tbl, aes(x = model, y = missclasificarion_error, group = dataset, fill = 
 
 ```
 
-we can see from the full results that the multinom and neural net both have perfect score on the train set, also the neural net has the best results on the test set, and even better results on the rest set then other models get on the train set!
+we can see from the full results that the multinom and neural net both have perfect score on the train set, also the neural net has the best results on the test set, and even better results on the test set then other models get on the train set!
 
 
 
@@ -244,39 +255,41 @@ we can see from the full results that the multinom and neural net both have perf
 
 x has many categorical variables and missing values, accuracy is critical
 
-good models can be - random forest and gradient boosting, both models have lower variance due to the fact that they average many predictors which will result in better accuracy, also both of them can handle missing values
+good models can be - random forest and gradient boosting, both models have lower variance due to the fact that they average many predictors which will result in better accuracy, also both of them can handle missing values, they should work well for regression and classification.
 
 bad models can be:  Linear regression - LR will probably preform not that good as it can't handle missing values well.
+also K-nn wont work that well for both classification and regression as it cannot handle missing values, also the nature of the problem is in high dimension and we know that the meaning of distance in high dimension is impaired.
 
 ### 2a.ii
 
 x has many categorical variables and missing values, speed of model building is critical
 
-good: Two models that can be good given the proper processing of missing values can be Logistic regression for classification and Linear regression for regression problems. they are both fast to train and run inference, but both will have a hard time with the high dimension so we can use lasso as a feature selection technique and thus reduce the dimension or ridge to shrink the coefficients.
+good: Two models that can be good given the proper processing of missing values can be Logistic regression for classification and Linear regression for regression problems. they are both fast to train and run inference, but both will have a hard time with the high dimension so we can use lasso as a feature selection technique and thus reduce the dimension.
 *a proper way for processing the missing values could be to set a new category "missing" for each categorical feature with missing values, after that we can use one hot encoding. it might even surprise us with very good predictions if the data is not missing at random and might have a connection to our target.
 
-bad models: Random forest, Boosting, both these models can achieve high accuracy and tree based models can handle missing values as well, but they will take a larger time to train and also run inference, each observation mush have prediction from all the trees and usually we want a lot of trees to be accurate, also each tree inference time is rather costly.
-K-nn will also not be that good here as for each new observation we need to calculate thee distance to all points in the train set in order to find the K closest ones
+bad models: Random forest, Boosting, both these models can achieve high accuracy and tree based models can handle missing values as well, but they will take a larger time to train and also run inference, each observation must have prediction from all the trees and usually we want a lot of trees to be accurate so the total run time will be rather long.
+K-nn will also not be that good here as for each new observation we need to calculate the distance to all points in the train set in order to find the K closest ones, and also it will not be good from the reason listed above.
 
 ### 2a.iii
 
 Large n, small p, you believe that there are complex dependencies between x and y (not only main effects / additive / low order)
 
 good - gradient boosting, random forest, deep learning and kernel machines can model complex dependencies between x and y thus all of them will be good in this case, also because we have a large number of samples and not many variables they will likely perform well without any regularization.
-the tree based models can capture complex dependencies as they split the sub space, neural nets can capture complex dependencies by using nonlinear activation functions, and kernel machines can capture complex dependencies by the nature of the dimention increacment
+the tree based models can capture complex dependencies as they split the sub space, neural nets can capture complex dependencies by using nonlinear activation functions, and kernel machines can capture complex dependencies by the nature of increasing the dimension.
 
 
-bad - Linear regression for regression, Logistic regression for classification, LDA for classification, all of these models assume some form of linearity thus will not be cable to capture complex dependencies between x and y and will probably preform poorly
+bad - Linear regression for regression, Logistic regression for classification, LDA for classification, all of these models assume some form of linearity thus will not be cable to capture complex dependencies between x and y and will probably preform poorly.
+
 
 ### 2a.iv
 
 Small n, large p, you believe only a small number of variables are important
 
-Good - Lasso: will help reduce the dimension of the problem by setting some of the coefficients to zero and keeping the important coefiecents.
-We can use lasso as a model, but also as a feature selection technique and then use all of the other models as with the selected features.
+Good - Lasso: will help reduce the dimension of the problem by setting some of the coefficients to zero and keeping the important coefficients.
+We can use lasso as a model, but also as a feature selection technique and then use all of the other models with the selected features.
 We can also use PCA to reduce p and afterwards we can use all the models (if we can find a d dimensional subspace where d<<n)
 
-Bad - linear regression will be very bad due to the fact that $X^tX$ is not invertible. also without any regularization we can't expect any of the other models to perform well when p>>n
+Bad - linear regression will be very bad due to the fact that $X^tX$ has no inverse. also without any regularization we can't expect any of the other models to perform well when p>>n
 
 ### 2b
 
@@ -300,11 +313,11 @@ setting $S(X,\lambda) = X (X^X + \lambda I)^-1X^T$ we get that ridge regression 
 $$
 \text{for clearer writing i will use the notation k instead of } i_0
 \\
-\text{denote } \hat \beta = argmin_\beta \sum_{i}(\tilde y^{(-k)}_i - ((X^{(-k)})^t\beta)_i)^2 + \lambda \sum_j \beta_j^2 = argmin_\beta L_k
+\text{denote } \hat \beta = argmin_\beta \sum_{i}(y^{(-k)}_i - ((X^{(-k)})^t\beta)_i)^2 + \lambda \sum_j \beta_j^2 = argmin_\beta L_k
 \\
 \hat{\tilde \beta} = argmin_\beta \sum_{i}(\tilde y_i - X_i^t\beta)^2 + \lambda \sum_j \beta_j^2
 \\
-\text{lets break doen the above expression}
+\text{lets break down the expression above}
 \\
 \sum_{i}(\tilde y_i - X_i^t\beta)^2 + \lambda \sum_j \beta_j^2 = \sum_{i\ne k}( y_i - X_i^t\beta)^2 +(\hat y_k^{(-k)} - X_k^t\beta)^2 + \lambda \sum_j \beta_j^2 = \sum_{i\ne k}( y_i - X_i^t\beta)^2 +(X_k^T \hat \beta - X_k^t\beta)^2 + \lambda \sum_j \beta_j^2=
 \\
@@ -312,7 +325,7 @@ $$
 \\
 \text{thus } \hat{\tilde \beta} = argmin_\beta L_k + (X_k^T (\hat \beta - \beta))^2
 \\
-\text{the argmin of } L_k \text{ is } \hat \beta \text{ and if we plug it in the formulaa above we get } L_k(\hat \beta) \text{ which achives the minimum of the equation above}
+\text{the argmin of } L_k \text{ is } \hat \beta \text{ and if we plug it in the formula above we get } L_k(\hat \beta) \text{ which achives the minimum of the equation above}
 \\
 \text{thus we can conclude that } \hat{\tilde \beta} = \hat \beta
 \\
@@ -347,7 +360,6 @@ S(X, \lambda)_{ii} = D_{ii}^2 (D_{ii}^2+\lambda I_p)^{-1}
 \text{thus } S(X, \lambda)_{ii} \text{ is a decreaceing funtion of } \lambda
 $$
 
-
 ### 3.d
 
 $$
@@ -358,6 +370,39 @@ $$
 \text{thus we can conclude that } S(X, \lambda)_{ii} \text{ is indeed a decreaceing funtion of } \lambda
 $$
 
+and lets also show by simulation:
+
+
+```{r}
+con <- url("http://www.tau.ac.il/~saharon/StatsLearn2022/train_ratings_all.dat")
+X <- tibble(read.table(con))
+con <- url("http://www.tau.ac.il/~saharon/StatsLearn2022/train_y_rating.dat")
+y <- read.table(con)
+X = as.matrix(X)[1:100,1:99]
+S_lambda = function(X, lambda){
+  return(X %*% solve(t(X) %*% X + lambda * diag(1,99,99)) %*% t(X))
+}
+lambdas = seq(0,2500,1)
+s_11 = c()
+trace_s = c()
+for (lambda in lambdas){
+  S_mat = S_lambda(X, lambda)
+  s_11 = c(s_11, S_mat[1,1])
+  trace_s = c(trace_s, sum(diag(S_mat)))
+}
+```
+
+
+```{r echo=FALSE}
+ggplot() +
+  geom_line(aes(x = lambdas, y = s_11*100, color = "S_11")) +
+  geom_line(aes(x = lambdas, y = trace_s, color = "trace(S)")) +
+  scale_color_manual(values = c("S_11" = "red", "trace(S)" = "blue")) +
+  xlab("lambda") +
+  ylab("") +
+  ggtitle("diagonal and trace behavior given lambda")
+```
+$S_11$ is scaled *100 so the we will see the relation.
 
 ### 3.e 
 
@@ -389,5 +434,233 @@ y_l \text{is the K+1 neighbour}
 \\
 \text{ thus we get that for all m: } \hat y_m^{(-m)} = \hat {\tilde y_m} \iff y_l = \hat y_m^{(-m)}  \iff y \text{ is a vector of the same values}
 \\
-\text{thus we can conclude that }
+\text{thus we can conclude that for if y has more then one unique value the K-NN model thus not supply the 2nd condition}
 $$
+
+
+# Q4
+
+
+### 4.a
+
+X is of full rank, a rank, a matrix of p*n matrix is bounded by: $rank(X) \le min(n,p)$ thus in our setup where $n \le p, rank(X) = n$
+
+
+from an algebraic view we know that for a system of linear equations with n equations and p variables where:  p>n, we have an infinite number of solutions. thus clearly the solution is not unique. (in our case we have p+1 variables including the intercept)
+
+this conclusion does not change with the loss. if $\sum_i (y_i - X_i^t\beta - \beta_0)^2 = 0$ then $y_i - X_i^t\beta - \beta_0 = 0 \ \forall i$
+also if $\sum_i |y_i - X_i^t\beta - \beta_0| = 0$ then $y_i - X_i^t\beta - \beta_0 = 0 \ \forall i \Rightarrow$  we have an infinite number of solutions
+for the quantile loss: $\sum_i \tau(y_i - X_i^t\beta - \beta_0)I(y_i > X_i^t\beta - \beta_0) -(1-\tau)(y_i - X_i^t\beta - \beta_0)I(y_i \le X_i^t\beta - \beta_0) = 0$
+notice that: $\tau(y_i - X_i^t\beta - \beta_0)I(y_i > X_i^t\beta - \beta_0) \ge 0$ , $-(1-\tau)(y_i - X_i^t\beta - \beta_0)I(y_i \le X_i^t\beta - \beta_0) \ge 0$
+thus we sum over non-negative number so in order for the sum to be zero each element need to be zero so we are left with: $y_i - X_i^t\beta - \beta_0 = 0 \ \forall i \Rightarrow$  we have an infinite number of solutions
+
+to conclude all the above losses have an infinite number of solutions in the case were $p \ge n$
+
+### 4.b
+
+assume in contradiction that we do not have a unique solution, thus
+
+$$
+L = \sum_{i=1}^n (y_i - X_i^t\beta - \beta_0)^2 + \lambda \sum_{j=1}^p \beta_j^2
+\\
+\forall j \ge 1: \frac{\partial L}{\partial \beta_j} = 2 \sum_i (y_i - X_i^t\beta - \beta_0)X^t_{ij}  + 2 \beta_j
+\\
+\text{now let } \tilde \beta \text{ be an interpulation point and plug it in the derevetive above we get:}
+\\
+\frac{\partial L}{\partial \beta_j}(\tilde \beta) = 0 + \tilde \beta_j = 0 \iff \tilde \beta_j =0
+\\
+\text{thus we have that for any interpolation point } \tilde \beta_j=0 \ \forall j \ge 1, \text{ thus } y_i - X_i^t \tilde \beta -  \tilde \beta_0 = y_i - \tilde \beta_0
+\\
+\text{but this is an interpolation point thus } y_i = \tilde \beta_0 \forall i \Rightarrow \text{y is a vector of constants}
+\\
+\text{thus if y is not a vector of constants we can see that there are no interpolation points}
+\\
+\text{thus the optimal solution is not an interpolation point}
+$$
+
+
+### 4.c
+
+
+$$
+\text{let } \tilde \beta \text{ be an optimal solution to }  min\sum_{j=1}^p \beta_j^2 \ s.t \sum_{i=1}^n (y_i - X_i^t\beta - \beta_0)^2 = 0
+\\
+\text{the objective of this minimization problem is the L2 norm squared} \sum_{j=1}^p \beta_j^2 = ||\beta||_2^2, \text{ so the } \beta \text{that minimized it also minimize the L2 norm}
+\\
+L(\tilde \beta) = \sum_{i=1}^n (y_i - X_i^t\tilde \beta - \tilde \beta_0)^2 + \lambda \sum_{j=1}^p \tilde \beta_j^2 = 0 + \lambda ||\tilde \beta||_2^2 \le \lambda ||\beta||_2^2 \quad \forall \beta \ s.t \sum_{i=1}^n (y_i - X_i^t\beta - \beta_0)^2 = 0
+\\
+\text{thus } \tilde \beta \text{ is the optimal solution to the ridge problem over all interpolation points}
+$$
+
+
+### 4.d
+
+$$
+\forall \lambda > 0 \text{ let } \hat \beta(\lambda) = argmin_{\beta} \sum_{i=1}^n (y_i - X_i^t\beta - \beta_0)^2 + \lambda \sum_{j=1}^p \beta_j^2 
+\\
+\text{from the previous results we know: } 
+\\
+1.\ \hat \beta(\lambda) \text{ is unique}
+\\
+2. \ \hat \beta^{(l2)} \text{ has the minimal norm over all the interpolation points and also has the smalleset ridge penelty} 
+\\
+\text{as } \lambda \text{ converge to 0: } \hat \beta(\lambda) \text{ converges to some } argmin_{\beta} \sum_{i=1}^n (y_i - X_i^t\beta - \beta_0)^2
+\\
+\text{meaning that } \hat \beta(0) \text{ is an interpolation point}
+\\
+\text{so exsists } \varepsilon \text{ close to zero such that for each } \lambda < \varepsilon \text{ exsits an interpolation solution}
+\\
+\text{thus for such } \lambda, \hat \beta(\lambda) \text{ is an interpolation point, and due to the optimality it also has the minimal norm } \Rightarrow ||\hat \beta^{(l2)}||_2 = ||\hat \beta(\lambda)||_2 \ \forall \lambda < \varepsilon
+\\
+\text{recall that } \hat \beta(\lambda) \text{ is a unique solution thus there is only one vector that is an interpolation point and satisfies: } ||\hat \beta^{(l2)}||_2 = ||\hat \beta(\lambda)||_2 
+\\
+\text{thus we get } \hat \beta(\lambda) \overset{\lambda \to 0}{\longrightarrow} \hat \beta^{(l2)}
+$$
+
+### 4.e
+
+general idea: Lagrange multipliers
+
+$$
+minimize \beta^t \beta
+\\
+s.t : X\beta = y
+\\
+\text{using lagrange multiplers we get: } L = \beta^t \beta + \lambda^T (X\beta-y)
+\\
+\frac{\partial L}{\partial \beta} = 2\beta + X^T\lambda = 0 \iff \beta = -\frac{1}{2}X^T\lambda
+\\
+\frac{\partial L}{\partial \lambda} = X\beta-y = -X\frac{1}{2}X^T\lambda -y = 0 \iff \lambda = -2(XX^t)^{-1}y
+\\
+\text{plug it back in to } \beta \text{ and we get: } \hat \beta = X^T(XX^t)^{-1}y
+$$
+
+
+### 4.f
+
+$$
+\text{in this case: } \hat \beta(\lambda) = argmin_{\beta} \sum_{i=1}^n (y_i - X_i^t\beta - \beta_0)^2 + \lambda \sum_{j=1}^p |\beta_j|
+\\
+\text{and } \hat \beta^{(l1)} =  argmin\sum_{j=1}^p |\beta_j| \ s.t \sum_{i=1}^n (y_i - X_i^t\beta - \beta_0)^2 = 0
+\\
+\text{in this case the result will be that } \hat \beta(\lambda) \overset{\lambda \to 0}{\longrightarrow} \hat \beta^{(l1)}
+\\
+\text{and we would expect the results to not chnage according to the loss by the same arguments in section  4.a}
+\\
+\text{in general for L1 loss, L2 loss and qunatile loss the constraints are equivelent to } y_i - X_i^t\beta - \beta_0 =0 \quad \forall i
+$$
+
+
+### 4.g
+
+#### 4.g.i
+
+```{r}
+con <- url("http://www.tau.ac.il/~saharon/StatsLearn2022/train_ratings_all.dat")
+X <- tibble(read.table(con))
+con <- url("http://www.tau.ac.il/~saharon/StatsLearn2022/train_y_rating.dat")
+y <- read.table(con)
+
+X_small = as.matrix(X[1:50,])
+y_small = y[1:50,]
+```
+
+```{r}
+ridge_fit = glmnet(X_small, y_small, alpha = 0, lambda = seq(0, 0.5, by = 0.001))
+ridge_rss = colSums((y_small - predict(ridge_fit, s = seq(0, 0.5, by = 0.001), newx = X_small))^2)
+ridge_norm = colSums(coef(ridge_fit)[2:100,]^2)
+lars_fit = lars(X_small, y_small)
+
+lasso_fit = glmnet(X_small, y_small, alpha = 1, lambda = seq(0, 0.5, by = 0.001))
+lasso_rss = colSums((y_small - predict(lasso_fit, s = seq(0, 0.5, by = 0.001), newx = X_small))^2)
+lasso_norm = colSums(abs(coef(lasso_fit)[2:100,]))
+
+ggplot() +
+  geom_line(aes(x = ridge_norm, y = ridge_rss, color = "Ridge")) +
+  geom_line(aes(x = lasso_norm, y = lasso_rss, color = "Lasso")) +
+  scale_color_manual(values = c("Ridge" = "red", "Lasso" = "blue")) +
+  xlab("Norm") +
+  ylab("RSS") +
+  ggtitle("Convergence of Ridge and Lasso Solutions")
+```
+
+
+
+#### 4.g.i
+
+
+```{r}
+ridge_fit = glmnet(X_small, y_small, alpha = 0, lambda = exp(-15))
+ridge_rss = colSums((y_small - predict(ridge_fit, s = exp(-15), newx = X_small))^2)
+ridge_norm = sum(coef(ridge_fit)[2:100]^2)
+
+lasso_fit = glmnet(X_small, y_small, alpha = 1, lambda = exp(-15))
+lasso_rss = colSums((y_small - predict(lasso_fit, s = exp(-15), newx = X_small))^2)
+lasso_norm = sum(abs(coef(lasso_fit)[2:100]))
+```
+
+
+```{r echo=FALSE}
+paste("lasso norm is: ", round(lasso_norm,4), "ridge norm is: ", round(ridge_norm,4))
+paste("lasso rss is: ", round(lasso_rss), "ridge rss is: ", round(ridge_rss))
+```
+
+### 4.h
+
+in regression we said that the model interpolate the data if it can fit each value of y correctly, in the classification senrio it is the same, we mange to classify each of the train observation to the appropriate class.
+
+in the multi class case we classify an observation to class i if $P(y_j = i|x_j,\beta)$ is the maximum over the set $\{p(y_j = k|x_j,\beta)\}_{k=1}^K$, where K is the number of classes
+
+denote $\hat y_k(\beta) = argmax_k\{p(y_j = k|x_j,\beta)\}_{k=1}^K$
+
+the corresponding minimum norm interpolation would be: $argmin\sum_{j=1}^p \beta_j^2 \ s.t \sum_{i=1}^n (1-I(y_i = \hat y_k(\beta))) = 0$
+
+### 4.i
+
+#### 4.i.i
+
+```{r}
+X_100 = as.matrix(X[1:100,])
+y_100 = y[1:100,]
+svm_small_gamma = svm(X_100,y_100, type="eps-regression", epsilon = 0, gamma =0.0001) # need to explain
+svm_large_gamma = svm(X_100,y_100, type="eps-regression", epsilon = 0, gamma =5) # need to explain
+cost_vals  = exp(seq(-10,10,0.1))
+err_small = c()
+err_large = c()
+for (cost in cost_vals){
+  svm_small_gamma = svm(X_100,y_100, type="eps-regression", epsilon = 0, gamma =0.0001, cost=cost)
+  svm_large_gamma = svm(X_100,y_100, type="eps-regression", epsilon = 0, gamma =5, cost=cost)
+  err_small = c(err_small,mean(abs(y_100 - predict(svm_small_gamma,X_100))))
+  err_large = c(err_large,mean(abs(y_100 - predict(svm_large_gamma,X_100))))
+}
+
+ggplot() +
+  geom_line(aes(x = log(cost_vals), y = err_small, color = "gamma =0.0001")) +
+  geom_line(aes(x = log(cost_vals), y = err_large, color = "gamma =5")) +
+  scale_color_manual(values = c("gamma =0.0001" = "red", "gamma =5" = "blue")) +
+  xlab("log cost") +
+  ylab("Mean absolute loss") +
+  ggtitle("Convergence of SVM solutions")
+```
+
+#### 4.i.ii
+
+
+#### 4.i.iii
+
+```{r}
+fake_x = matrix(rep(5,99),1,99)
+colnames(fake_x) = colnames(X_100)
+svm_small_gamma = svm(X_100,y_100, type="eps-regression", epsilon = 0, gamma =0.0001, cost=exp(15))
+svm_large_gamma = svm(X_100,y_100, type="eps-regression", epsilon = 0, gamma =5, cost=exp(15))
+```
+
+```{r echo=FALSE}
+paste("small gamma prediction: ", predict(svm_small_gamma,fake_x))
+paste("large gamma prediction: ", predict(svm_large_gamma,fake_x))
+```
+
+we can see that the results are rather close, but a person that rates everything 5 would probably rate the target movie 5 as well, so we can see that both models are interpolating
+
+
+#### 4.i.iv
