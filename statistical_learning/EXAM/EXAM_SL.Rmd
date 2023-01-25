@@ -191,9 +191,6 @@ cnn_model <- keras_model_sequential() %>%
   layer_dense(units = 16, activation = "relu") %>%
   layer_dropout(rate = 0.1) %>%
   layer_dense(units = 3, activation = "softmax")
-
-
-summary(cnn_model)
 ```
 compile and train the model
 
@@ -212,7 +209,7 @@ tibble(model_dataset = c("neural net train", "neural net test"),
        err = c(cnn_train_res$classification_err, cnn_test_res$classification_err))
 ```
 
-we can see that this model is far better then the ones before, also it still has a much lower error in the train set, we can keep playing with the paramaters of the model (add some more regularization or use data augmentation -[which for some reason doesnt work for me in r]) to get even better results
+we can see that this model is far better then the ones before, also it still has a much lower error in the train set, we can keep playing with the paramaters of the model (add some more regularization or use data augmentation) to get even better results
 
 
 lets take a look at the test confusion matrix
@@ -224,29 +221,85 @@ cnn_test_res$conf_matrix
 
 we can see that the results are much better, we still some difficulties with the 5's which is most challenging to classify.
 
+
+lets improve the model by using some more modern techniques like data augmentation
+data augmentation "creates" new images by applying several transformations on the image and thus improves the generalization of the model by introducing new observations.
+
+in this case i choose to apply:
+
+rotation - rotates the images
+
+width, height shifts - which applies translation on the image to left/right, up/down
+
+zoom - which zooms in/ out on an image
+
+all of this transformation are rather reasonable by the sense hat applying them wont change the image much but they are still valid drown numbers. it doesn't really matter if you draw a number in the middle of the box or a bit shifted up/down/left/right, also the scale does not matter, it the same if you draw a small number or a larger number, and also the same applies for rotation
+
+
+```{r}
+datagen <- image_data_generator(rotation_range = 10,width_shift_range = 0.1,height_shift_range = 0.1,zoom_range = 0.1)
+
+train_generator <- flow_images_from_data(X_train_net,y_train_net,datagen,32)
+
+cnn_model_aug <- keras_model_sequential() %>%
+  layer_conv_2d(filters = 16, kernel_size = c(3, 3), activation = "relu", input_shape = c(16, 16, 1)) %>%
+  layer_conv_2d(filters = 16, kernel_size = c(3, 3), activation = "relu") %>%
+  layer_max_pooling_2d(pool_size = c(2, 2)) %>%
+  layer_flatten() %>%
+  layer_batch_normalization() %>%
+  layer_dense(units = 32, activation = "relu") %>%
+  layer_dropout(rate = 0.2) %>%
+  layer_dense(units = 16, activation = "relu") %>%
+  layer_dropout(rate = 0.1) %>%
+  layer_dense(units = 3, activation = "softmax")
+```
+
+compile and train
+
+```{r}
+cnn_model_aug %>% compile(loss = 'sparse_categorical_crossentropy',optimizer = optimizer_adam(learning_rate = 0.00005),metrics = c('accuracy'))
+
+cnn_model_aug %>% fit(train_generator, batch_size = 32,epochs = 200,verbose = 1,
+                  class_weight = list("0" = 1.25, "1" = 0.7, "2" = 0.85))
+```
+
+get results
+
+```{r}
+cnn_aug_train_res = get_results(cnn_model_aug, X_train_net, y_train, FALSE, TRUE)
+cnn_aug_test_res = get_results(cnn_model_aug, X_test_net, y_test, FALSE, TRUE)
+tibble(model_dataset = c("CNN aug train", "CNN aug test"),
+       err = c(cnn_aug_train_res$classification_err, cnn_aug_test_res$classification_err))
+```
+
 the over all results:
 
 ```{r echo=FALSE}
-tbl = tibble(model_dataset = c("lda", "lda with pca", "multinom", "multinom with pca", "neural net"),
-       err_train = c(lda_train_results$classification_er , lda_pca_train_results$classification_err, multinom_train_results$classification_err,  multinom_pca_train_results$classification_err, cnn_train_res$classification_err),
-       err_test = c(lda_test_results$classification_err, lda_pca_test_results$classification_err, multinom_test_results$classification_err,  multinom_pca_test_results$classification_err,cnn_test_res$classification_err) ) %>% arrange(err_test)
+tbl = tibble(model_dataset = c("lda", "lda with pca", "multinom", "multinom with pca", "neural net", "neural net aug"),
+       err_train = c(lda_train_results$classification_er , lda_pca_train_results$classification_err, multinom_train_results$classification_err,  multinom_pca_train_results$classification_err, cnn_train_res$classification_err, cnn_aug_train_res$classification_err),
+       err_test = c(lda_test_results$classification_err, lda_pca_test_results$classification_err, multinom_test_results$classification_err,  multinom_pca_test_results$classification_err,cnn_test_res$classification_err, cnn_aug_test_res$classification_err) ) %>% arrange(err_test)
 tbl
 ```
 
 ```{r echo=FALSE}
-tbl = tibble(model = c("lda", "lda with pca", "multinom", "multinom with pca", "CNN","lda", "lda with pca", "multinom", "multinom with pca", "CNN"),
-       missclasificarion_error = c(lda_train_results$classification_er , lda_pca_train_results$classification_err, multinom_train_results$classification_err,  multinom_pca_train_results$classification_err, cnn_train_res$classification_err, lda_test_results$classification_err, lda_pca_test_results$classification_err, multinom_test_results$classification_err,  multinom_pca_test_results$classification_err,cnn_test_res$classification_err) ,
-       dataset = c("train", "train", "train", "train", "train", "test", "test", "test", "test", "test")) %>% arrange(missclasificarion_error)
+tbl = tibble(model = c("lda", "lda with pca", "multinom", "multinom with pca", "CNN", "CNN aug",
+                        "lda", "lda with pca", "multinom", "multinom with pca", "CNN", "CNN aug"),
+       missclasificarion_error = c(lda_train_results$classification_er , lda_pca_train_results$classification_err,                                                                 multinom_train_results$classification_err,  multinom_pca_train_results$classification_err,
+                                   cnn_train_res$classification_err, cnn_aug_train_res$classification_err,
+                                   lda_test_results$classification_err, lda_pca_test_results$classification_err,                                                                    multinom_test_results$classification_err,multinom_pca_test_results$classification_err,
+                                   cnn_test_res$classification_err, cnn_aug_test_res$classification_err) ,
+       dataset = c("train", "train", "train", "train", "train", "train",
+                   "test", "test", "test", "test", "test", "test")) %>% arrange(missclasificarion_error)
+
 ggplot(tbl, aes(x = model, y = missclasificarion_error, group = dataset, fill = dataset)) +
-  geom_col(stat = "identity", position = "dodge")+
+  geom_col(position = "dodge")+
   geom_text(aes(label=str_c(round(missclasificarion_error,4)*100, "%")), position = position_dodge(0.90), size = 3, 
             vjust=-0.8, hjust=0.5, colour = "gray25")
 
 
 ```
 
-we can see from the full results that the multinom and neural net both have perfect score on the train set, also the neural net has the best results on the test set, and even better results on the test set then other models get on the train set!
-
+we can see from the full results that the multinom and neural net both have perfect score on the train set, also the neural net with augmentation has the best results on the test set, and even better results on the test set then other models get on the train set!
 
 
 # Q2
@@ -402,7 +455,7 @@ ggplot() +
   ylab("") +
   ggtitle("diagonal and trace behavior given lambda")
 ```
-$S_11$ is scaled *100 so the we will see the relation.
+$S_{11}$ is scaled *100 so the we will see the relation.
 
 ### 3.e 
 
@@ -434,7 +487,7 @@ y_l \text{is the K+1 neighbour}
 \\
 \text{ thus we get that for all m: } \hat y_m^{(-m)} = \hat {\tilde y_m} \iff y_l = \hat y_m^{(-m)}  \iff y \text{ is a vector of the same values}
 \\
-\text{thus we can conclude that for if y has more then one unique value the K-NN model thus not supply the 2nd condition}
+\text{thus we can conclude that if y has more then one unique value the K-NN model does not supply the 2nd condition}
 $$
 
 
@@ -555,6 +608,8 @@ $$
 
 #### 4.g.i
 
+for some reason i cant load the l1ce package so i will use glmnet.
+
 ```{r}
 con <- url("http://www.tau.ac.il/~saharon/StatsLearn2022/train_ratings_all.dat")
 X <- tibble(read.table(con))
@@ -565,14 +620,15 @@ X_small = as.matrix(X[1:50,])
 y_small = y[1:50,]
 ```
 
-```{r}
-ridge_fit = glmnet(X_small, y_small, alpha = 0, lambda = seq(0, 0.5, by = 0.001))
-ridge_rss = colSums((y_small - predict(ridge_fit, s = seq(0, 0.5, by = 0.001), newx = X_small))^2)
-ridge_norm = colSums(coef(ridge_fit)[2:100,]^2)
-lars_fit = lars(X_small, y_small)
 
-lasso_fit = glmnet(X_small, y_small, alpha = 1, lambda = seq(0, 0.5, by = 0.001))
-lasso_rss = colSums((y_small - predict(lasso_fit, s = seq(0, 0.5, by = 0.001), newx = X_small))^2)
+
+```{r}
+ridge_fit = glmnet(X_small, y_small, alpha = 0, lambda = seq(0, 0.5, by = 0.0001))
+ridge_rss = colSums((y_small - predict(ridge_fit, s = seq(0, 0.5, by = 0.0001), newx = X_small))^2)
+ridge_norm = colSums(coef(ridge_fit)[2:100,]^2)
+
+lasso_fit = glmnet(X_small, y_small, alpha = 1, lambda = seq(0, 0.5, by = 0.0001))
+lasso_rss = colSums((y_small - predict(lasso_fit, s = seq(0, 0.5, by = 0.0001), newx = X_small))^2)
 lasso_norm = colSums(abs(coef(lasso_fit)[2:100,]))
 
 ggplot() +
@@ -605,9 +661,29 @@ paste("lasso norm is: ", round(lasso_norm,4), "ridge norm is: ", round(ridge_nor
 paste("lasso rss is: ", round(lasso_rss), "ridge rss is: ", round(ridge_rss))
 ```
 
+we can see that indeed both models end up in an interpolation point. and also that the ridge norm is alot lower than the lasso norm.
+on one hand it makes sense because if a lot of coefficients are small then the L2 loss should be lower (if they achieve a similar solution), but this got me to think and along with the recommendation to not use glmnet i took a closer look at the coefficient of the lasso, and saw non of them are 0!
+
+
+```{r}
+sum(abs(coef(lasso_fit))>0)
+```
+
+i dont know for sure why we get such a solution, i could not find a proper explanation in help(glmnet), but it might be that for very small values of $\lambda$ the glmnet treats it as 0 and thus yield a linear regression solution.
+
+if i set lambda = 0.01 we get that some coefficients do become 0
+
+```{r}
+lasso_fit = glmnet(X_small, y_small, alpha = 1, lambda = 0.01)
+lasso_rss = colSums((y_small - predict(lasso_fit, s = 0.01, newx = X_small))^2)
+lasso_norm = sum(abs(coef(lasso_fit)[2:100]))
+sum(abs(coef(lasso_fit))>0)
+```
+
+
 ### 4.h
 
-in regression we said that the model interpolate the data if it can fit each value of y correctly, in the classification senrio it is the same, we mange to classify each of the train observation to the appropriate class.
+in regression we said that the model interpolate the data if it can fit each value of y correctly, in the classification scenario it is the same, we mange to classify each of the train observation to the appropriate class.
 
 in the multi class case we classify an observation to class i if $P(y_j = i|x_j,\beta)$ is the maximum over the set $\{p(y_j = k|x_j,\beta)\}_{k=1}^K$, where K is the number of classes
 
@@ -619,11 +695,13 @@ the corresponding minimum norm interpolation would be: $argmin\sum_{j=1}^p \beta
 
 #### 4.i.i
 
+we saw that the SVM loss is $L(y, \hat y) = (|y-\hat y| - \varepsilon)_+$ so in the case that $\varepsilon = 0$ the loss becomes: $(|y-\hat y|)_+ = |y-\hat y|$ which is the absolute loss
+
 ```{r}
 X_100 = as.matrix(X[1:100,])
 y_100 = y[1:100,]
-svm_small_gamma = svm(X_100,y_100, type="eps-regression", epsilon = 0, gamma =0.0001) # need to explain
-svm_large_gamma = svm(X_100,y_100, type="eps-regression", epsilon = 0, gamma =5) # need to explain
+svm_small_gamma = svm(X_100,y_100, type="eps-regression", epsilon = 0, gamma =0.0001)
+svm_large_gamma = svm(X_100,y_100, type="eps-regression", epsilon = 0, gamma =5)
 cost_vals  = exp(seq(-10,10,0.1))
 err_small = c()
 err_large = c()
@@ -645,6 +723,9 @@ ggplot() +
 
 #### 4.i.ii
 
+for a kernel $K(x,y) = <h(x),h(y)> = \sum_{j=1}^q h_j(x)h_j(y)$ we defined $f = \sum_j \beta_j h_j$, also we know that: $||f||_{HK}^2 =\sum_j\beta_j^2$
+
+the kernel is a function of $\gamma$, in our case $K_\gamma(x,y) = exp(-||x-y||^2/(2\gamma^2))$, thus for different values of $\gamma$ we have different kernels, different h functions and different $\beta_j$ for each $h_j$. so if $\gamma \ne \gamma '$ we have $||f_\gamma||_{HK}^2 \ne f_{\gamma'}||_{HK}^2$, and this norm is the regularization term 
 
 #### 4.i.iii
 
@@ -656,11 +737,53 @@ svm_large_gamma = svm(X_100,y_100, type="eps-regression", epsilon = 0, gamma =5,
 ```
 
 ```{r echo=FALSE}
-paste("small gamma prediction: ", predict(svm_small_gamma,fake_x))
-paste("large gamma prediction: ", predict(svm_large_gamma,fake_x))
+paste("small gamma prediction:", round(predict(svm_small_gamma,fake_x),5),"the training mean error is:", mean(y_100- predict(svm_small_gamma,X_100)))
+paste("large gamma prediction:", round(predict(svm_large_gamma,fake_x),5),"the training mean error is:", mean(y_100- predict(svm_large_gamma,X_100)))
+paste("the mean value of y is :", mean(y_100))
 ```
-
-we can see that the results are rather close, but a person that rates everything 5 would probably rate the target movie 5 as well, so we can see that both models are interpolating
 
 
 #### 4.i.iv
+
+we can see that the results are rather close, but a person that rates everything 5 would probably rate the target movie 5 as well, so we can see that both models are interpolating
+
+we see that for large $\gamma$ we get a prediction very close to the mean of our target vector, this is due to the fact that for large gammas the observations are considered closer together and our K matrix becomes almost $\underline1^T\underline1$ (a matrix full of ones) so each new prediction will get a constant value of the mean of the target
+
+we can easily demonstrate it using a fake observation with all ones:
+
+```{r}
+fake_x = matrix(rep(1,99),1,99)
+colnames(fake_x) = colnames(X_100)
+svm_large_gamma = svm(X_100,y_100, type="eps-regression", epsilon = 0, gamma =5, cost=exp(15))
+```
+
+
+```{r echo=FALSE}
+paste("large gamma prediction: ", round(predict(svm_large_gamma,fake_x),5))
+paste("the mean value of y is : ", mean(y_100))
+```
+
+for small values of $\gamma$ our model acts more or less like 1-NN. for very small values of $\gamma$ we have $K_\gamma(x,y) = exp(-||x-y||^2/(2\gamma^2)) \approx exp(-\infty)I(x \ne y) + exp(0)I(x=y) = I(x=y)$ so for each observation on the train set we predict the value of the observation itself because all other observation are given a weight close to zero. 
+
+this is in the case that $\gamma$ is very very small, in our case $\gamma$ is small but not that close to zero so we have a larger neighborhood
+
+lets demonstrate by taking the 5 closest neighbors of our movie lover fake person
+
+```{r}
+dist_mat = (X_100 - matrix(rep(5,99*100),100,99))^2
+norms = apply(dist_mat,1,sum)
+nn_5 = order(norms)[1:5]
+mean(y_100[nn_5])
+```
+
+as we can see the result is very close to the prediction of our small $\gamma$
+
+#### 4.i.v
+
+as we saw in the case where $\gamma = 5$ the fit at this point (or in general at any other point) is the mean of y (our target vector).
+
+we have a large cost, thus for minimizing the loss function we need to minimize the errors term because the penalty for large coefficient becomes neglect able.
+
+thus for each interior point we have an interpolation, and each exterior point is a weighted sum over our observation, the weights are given by the kernel, and because of the large $\gamma$ our distances increase and lose their meaning. so for a new observation we have similar weighted distance to all other observation, thus our new observation is assigned with the value of mean(y)
+
+
