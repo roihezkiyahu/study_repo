@@ -124,8 +124,8 @@ building the models:
 
 
 ```{r message=FALSE}
-multinom_full = multinom(y~., df_train)
-multinom_pca = multinom(y~., df_pca_train_100)
+multinom_full = multinom(y~., df_train, maxit = 250)
+multinom_pca = multinom(y~., df_pca_train_100, maxit = 250)
 ```
 
 getting results:
@@ -227,13 +227,13 @@ data augmentation "creates" new images by applying several transformations on th
 
 in this case i choose to apply:
 
-rotation - rotates the images
+rotation - rotates the images by a certain degree
 
 width, height shifts - which applies translation on the image to left/right, up/down
 
 zoom - which zooms in/ out on an image
 
-all of this transformation are rather reasonable by the sense hat applying them wont change the image much but they are still valid drown numbers. it doesn't really matter if you draw a number in the middle of the box or a bit shifted up/down/left/right, also the scale does not matter, it the same if you draw a small number or a larger number, and also the same applies for rotation
+all of this transformation are rather reasonable by the sense that applying them won't change the image much but they are still valid handwritten numbers. it doesn't really matter if you draw a number in the middle of the box or a bit shifted up/down/left/right, also the scale does not matter, it's the same if you draw a small number or a larger number, and also the same applies for rotation
 
 
 ```{r}
@@ -318,6 +318,7 @@ also K-nn wont work that well for both classification and regression as it canno
 x has many categorical variables and missing values, speed of model building is critical
 
 good: Two models that can be good given the proper processing of missing values can be Logistic regression for classification and Linear regression for regression problems. they are both fast to train and run inference, but both will have a hard time with the high dimension so we can use lasso as a feature selection technique and thus reduce the dimension.
+
 *a proper way for processing the missing values could be to set a new category "missing" for each categorical feature with missing values, after that we can use one hot encoding. it might even surprise us with very good predictions if the data is not missing at random and might have a connection to our target.
 
 bad models: Random forest, Boosting, both these models can achieve high accuracy and tree based models can handle missing values as well, but they will take a larger time to train and also run inference, each observation must have prediction from all the trees and usually we want a lot of trees to be accurate so the total run time will be rather long.
@@ -455,7 +456,8 @@ ggplot() +
   ylab("") +
   ggtitle("diagonal and trace behavior given lambda")
 ```
-$S_{11}$ is scaled *100 so the we will see the relation.
+
+$S_{11}$ is scaled *100 so that we will see the relation.
 
 ### 3.e 
 
@@ -496,14 +498,17 @@ $$
 
 ### 4.a
 
-X is of full rank, a rank, a matrix of p*n matrix is bounded by: $rank(X) \le min(n,p)$ thus in our setup where $n \le p, rank(X) = n$
+X is of full rank, a matrix of p*n matrix is bounded by: $rank(X) \le min(n,p)$ thus in our setup where $n \le p, rank(X) = n$
 
 
 from an algebraic view we know that for a system of linear equations with n equations and p variables where:  p>n, we have an infinite number of solutions. thus clearly the solution is not unique. (in our case we have p+1 variables including the intercept)
 
 this conclusion does not change with the loss. if $\sum_i (y_i - X_i^t\beta - \beta_0)^2 = 0$ then $y_i - X_i^t\beta - \beta_0 = 0 \ \forall i$
 also if $\sum_i |y_i - X_i^t\beta - \beta_0| = 0$ then $y_i - X_i^t\beta - \beta_0 = 0 \ \forall i \Rightarrow$  we have an infinite number of solutions
-for the quantile loss: $\sum_i \tau(y_i - X_i^t\beta - \beta_0)I(y_i > X_i^t\beta - \beta_0) -(1-\tau)(y_i - X_i^t\beta - \beta_0)I(y_i \le X_i^t\beta - \beta_0) = 0$
+
+for the quantile loss:
+
+$\sum_i \tau(y_i - X_i^t\beta - \beta_0)I(y_i > X_i^t\beta - \beta_0) -(1-\tau)(y_i - X_i^t\beta - \beta_0)I(y_i \le X_i^t\beta - \beta_0) = 0$
 notice that: $\tau(y_i - X_i^t\beta - \beta_0)I(y_i > X_i^t\beta - \beta_0) \ge 0$ , $-(1-\tau)(y_i - X_i^t\beta - \beta_0)I(y_i \le X_i^t\beta - \beta_0) \ge 0$
 thus we sum over non-negative number so in order for the sum to be zero each element need to be zero so we are left with: $y_i - X_i^t\beta - \beta_0 = 0 \ \forall i \Rightarrow$  we have an infinite number of solutions
 
@@ -511,22 +516,22 @@ to conclude all the above losses have an infinite number of solutions in the cas
 
 ### 4.b
 
-assume in contradiction that we do not have a unique solution, thus
+assume in contradiction that we do not have an interpolation solution
 
 $$
 L = \sum_{i=1}^n (y_i - X_i^t\beta - \beta_0)^2 + \lambda \sum_{j=1}^p \beta_j^2
 \\
 \forall j \ge 1: \frac{\partial L}{\partial \beta_j} = 2 \sum_i (y_i - X_i^t\beta - \beta_0)X^t_{ij}  + 2 \beta_j
 \\
-\text{now let } \tilde \beta \text{ be an interpulation point and plug it in the derevetive above we get:}
+\text{now let } \tilde \beta \text{ be an interpulation solution and plug it in the derevetive above we get:}
 \\
 \frac{\partial L}{\partial \beta_j}(\tilde \beta) = 0 + \tilde \beta_j = 0 \iff \tilde \beta_j =0
 \\
-\text{thus we have that for any interpolation point } \tilde \beta_j=0 \ \forall j \ge 1, \text{ thus } y_i - X_i^t \tilde \beta -  \tilde \beta_0 = y_i - \tilde \beta_0
+\text{thus we have that for any interpolation solution } \tilde \beta_j=0 \ \forall j \ge 1, \text{ thus } y_i - X_i^t \tilde \beta -  \tilde \beta_0 = y_i - \tilde \beta_0
 \\
-\text{but this is an interpolation point thus } y_i = \tilde \beta_0 \forall i \Rightarrow \text{y is a vector of constants}
+\text{but this is an interpolation solution thus } y_i = \tilde \beta_0 \forall i \Rightarrow \text{y is a vector of constants}
 \\
-\text{thus if y is not a vector of constants we can see that there are no interpolation points}
+\text{thus if y is not a vector of constants we can see that there are no interpolation solutions that minimze L}
 \\
 \text{thus the optimal solution is not an interpolation point}
 $$
@@ -538,7 +543,9 @@ $$
 $$
 \text{let } \tilde \beta \text{ be an optimal solution to }  min\sum_{j=1}^p \beta_j^2 \ s.t \sum_{i=1}^n (y_i - X_i^t\beta - \beta_0)^2 = 0
 \\
-\text{the objective of this minimization problem is the L2 norm squared} \sum_{j=1}^p \beta_j^2 = ||\beta||_2^2, \text{ so the } \beta \text{that minimized it also minimize the L2 norm}
+\text{the objective of this minimization problem is the L2 norm squared} \sum_{j=1}^p \beta_j^2 = ||\beta||_2^2, 
+\\
+\text{ so the } \beta \text{ that minimized it also minimize the L2 norm}
 \\
 L(\tilde \beta) = \sum_{i=1}^n (y_i - X_i^t\tilde \beta - \tilde \beta_0)^2 + \lambda \sum_{j=1}^p \tilde \beta_j^2 = 0 + \lambda ||\tilde \beta||_2^2 \le \lambda ||\beta||_2^2 \quad \forall \beta \ s.t \sum_{i=1}^n (y_i - X_i^t\beta - \beta_0)^2 = 0
 \\
@@ -563,7 +570,9 @@ $$
 \\
 \text{so exsists } \varepsilon \text{ close to zero such that for each } \lambda < \varepsilon \text{ exsits an interpolation solution}
 \\
-\text{thus for such } \lambda, \hat \beta(\lambda) \text{ is an interpolation point, and due to the optimality it also has the minimal norm } \Rightarrow ||\hat \beta^{(l2)}||_2 = ||\hat \beta(\lambda)||_2 \ \forall \lambda < \varepsilon
+\text{thus for such } \lambda, \hat \beta(\lambda) \text{ is an interpolation point, and due to the optimality it also has the minimal norm } \Rightarrow
+\\
+\Rightarrow ||\hat \beta^{(l2)}||_2 = ||\hat \beta(\lambda)||_2 \ \forall \lambda < \varepsilon
 \\
 \text{recall that } \hat \beta(\lambda) \text{ is a unique solution thus there is only one vector that is an interpolation point and satisfies: } ||\hat \beta^{(l2)}||_2 = ||\hat \beta(\lambda)||_2 
 \\
@@ -572,7 +581,6 @@ $$
 
 ### 4.e
 
-general idea: Lagrange multipliers
 
 $$
 minimize \beta^t \beta
@@ -608,77 +616,84 @@ $$
 
 #### 4.g.i
 
-for some reason i cant load the l1ce package so i will use glmnet.
+for some reason i cant load the l1ce package and becuase of the suggestion to not use glmnet, i will use python instead.
 
-```{r}
-con <- url("http://www.tau.ac.il/~saharon/StatsLearn2022/train_ratings_all.dat")
-X <- tibble(read.table(con))
-con <- url("http://www.tau.ac.il/~saharon/StatsLearn2022/train_y_rating.dat")
-y <- read.table(con)
 
-X_small = as.matrix(X[1:50,])
-y_small = y[1:50,]
+```{python, eval=FALSE, echo=TRUE}
+import pandas as pd
+import requests
+from sklearn.linear_model import Ridge, Lasso
+from sklearn.metrics import mean_squared_error
+import numpy as np
+import matplotlib.pyplot as plt
+
+con = requests.get("http://www.tau.ac.il/~saharon/StatsLearn2022/train_ratings_all.dat")
+X = pd.read_csv(con.url, sep='\t', header=None)
+con = requests.get("http://www.tau.ac.il/~saharon/StatsLearn2022/train_y_rating.dat")
+y = pd.read_csv(con.url, sep='\t', header=None)
+
+X_small = X.iloc[:50,:]
+y_small = y.iloc[:50,:]
+
+alphas = np.linspace(0, 100, num=1000)
+
+ridge_rss = []
+ridge_norm = []
+for alpha in alphas:
+    ridge = Ridge(alpha=alpha)
+    ridge.fit(X_small, y_small)
+    ridge_rss.append(mean_squared_error(y_small, ridge.predict(X_small)))
+    ridge_norm.append(np.sum(np.square(ridge.coef_)))
+
+lasso_rss = []
+lasso_norm = []
+
+for alpha in alphas:
+    lasso = Lasso(alpha=alpha)
+    lasso.fit(X_small, y_small)
+    lasso_rss.append(mean_squared_error(y_small, lasso.predict(X_small)))
+    lasso_norm.append(np.sum(np.abs(lasso.coef_)))
+
+plt.figure()
+plt.plot(ridge_norm, ridge_rss, 'r', label='Ridge')
+plt.plot(lasso_norm, lasso_rss, 'b', label='Lasso')
+plt.plot([0,9], [0,0],'-.', color = 'g', label='0')
+plt.xlabel('Norm')
+plt.ylabel('RSS')
+plt.title('Convergence of Ridge and Lasso Solutions')
+plt.legend(loc='upper right')
+plt.show()
 ```
 
 
+![](lasso_ridge_graph.png)
 
-```{r}
-ridge_fit = glmnet(X_small, y_small, alpha = 0, lambda = seq(0, 0.5, by = 0.0001))
-ridge_rss = colSums((y_small - predict(ridge_fit, s = seq(0, 0.5, by = 0.0001), newx = X_small))^2)
-ridge_norm = colSums(coef(ridge_fit)[2:100,]^2)
+we can see that as $\lambda$ increaces the norm increaces and the RSS decreases to 0 (an interpolation solution)
 
-lasso_fit = glmnet(X_small, y_small, alpha = 1, lambda = seq(0, 0.5, by = 0.0001))
-lasso_rss = colSums((y_small - predict(lasso_fit, s = seq(0, 0.5, by = 0.0001), newx = X_small))^2)
-lasso_norm = colSums(abs(coef(lasso_fit)[2:100,]))
+#### 4.g.ii
 
-ggplot() +
-  geom_line(aes(x = ridge_norm, y = ridge_rss, color = "Ridge")) +
-  geom_line(aes(x = lasso_norm, y = lasso_rss, color = "Lasso")) +
-  scale_color_manual(values = c("Ridge" = "red", "Lasso" = "blue")) +
-  xlab("Norm") +
-  ylab("RSS") +
-  ggtitle("Convergence of Ridge and Lasso Solutions")
+
+```{python, eval=FALSE, echo=TRUE}
+ridge = Ridge(alpha=np.exp(-15))
+ridge.fit(X_small, y_small)
+ridge_rss = mean_squared_error(y_small, ridge.predict(X_small))
+ridge_norm = np.sum(ridge.coef_**2)
+
+lasso = Lasso(alpha=np.exp(-15))
+lasso.fit(X_small, y_small)
+lasso_rss = mean_squared_error(y_small, lasso.predict(X_small))
+lasso_norm = np.sum(abs(lasso.coef_))
 ```
 
-
-
-#### 4.g.i
-
-
-```{r}
-ridge_fit = glmnet(X_small, y_small, alpha = 0, lambda = exp(-15))
-ridge_rss = colSums((y_small - predict(ridge_fit, s = exp(-15), newx = X_small))^2)
-ridge_norm = sum(coef(ridge_fit)[2:100]^2)
-
-lasso_fit = glmnet(X_small, y_small, alpha = 1, lambda = exp(-15))
-lasso_rss = colSums((y_small - predict(lasso_fit, s = exp(-15), newx = X_small))^2)
-lasso_norm = sum(abs(coef(lasso_fit)[2:100]))
-```
 
 
 ```{r echo=FALSE}
-paste("lasso norm is: ", round(lasso_norm,4), "ridge norm is: ", round(ridge_norm,4))
-paste("lasso rss is: ", round(lasso_rss), "ridge rss is: ", round(ridge_rss))
+print("lasso norm is:  8.7191 ridge norm is:  0.7302")
+print("lasso rss is:  0 ridge rss is:  0")
 ```
 
 we can see that indeed both models end up in an interpolation point. and also that the ridge norm is alot lower than the lasso norm.
-on one hand it makes sense because if a lot of coefficients are small then the L2 loss should be lower (if they achieve a similar solution), but this got me to think and along with the recommendation to not use glmnet i took a closer look at the coefficient of the lasso, and saw non of them are 0!
-
-
-```{r}
-sum(abs(coef(lasso_fit))>0)
-```
-
-i dont know for sure why we get such a solution, i could not find a proper explanation in help(glmnet), but it might be that for very small values of $\lambda$ the glmnet treats it as 0 and thus yield a linear regression solution.
-
-if i set lambda = 0.01 we get that some coefficients do become 0
-
-```{r}
-lasso_fit = glmnet(X_small, y_small, alpha = 1, lambda = 0.01)
-lasso_rss = colSums((y_small - predict(lasso_fit, s = 0.01, newx = X_small))^2)
-lasso_norm = sum(abs(coef(lasso_fit)[2:100]))
-sum(abs(coef(lasso_fit))>0)
-```
+ridge usually shrinks the coefficients while lasso zeros some of them out, also most coefficients are smaller then 1 so squaring them makes them smaller, this is why we can see that the ridge solution has a lower norm (L2) then the lasso norm (L1)
 
 
 ### 4.h
@@ -735,6 +750,7 @@ colnames(fake_x) = colnames(X_100)
 svm_small_gamma = svm(X_100,y_100, type="eps-regression", epsilon = 0, gamma =0.0001, cost=exp(15))
 svm_large_gamma = svm(X_100,y_100, type="eps-regression", epsilon = 0, gamma =5, cost=exp(15))
 ```
+
 
 ```{r echo=FALSE}
 paste("small gamma prediction:", round(predict(svm_small_gamma,fake_x),5),"the training mean error is:", mean(y_100- predict(svm_small_gamma,X_100)))
